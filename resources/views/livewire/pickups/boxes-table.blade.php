@@ -1,0 +1,17 @@
+<div>
+    <x-data-table 
+        :data="$rows" 
+        :headers="$dataTable['headers']" 
+        :showActions="$dataTable['showActions']"
+        :editRoute="$dataTable['editRoute']"
+        :viewRoute="$dataTable['viewRoute']"
+        :deleteAction="$dataTable['deleteAction']"
+        :createRoute="$dataTable['createRoute']"
+        :showSearch="$dataTable['showSearch']"
+        :searchPlaceholder="$dataTable['searchPlaceholder']" 
+        :emptyMessage="$dataTable['emptyMessage']" 
+        :searchQuery="$search" 
+        :sortColumn="$sortColumn" 
+        :sortDirection="$sortDirection"
+    />
+</div>

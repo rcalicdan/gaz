@@ -1,0 +1,159 @@
+:root {
+    --color-primary-accent: #7BC143; /* główny jasny zielony z logo */
+    --color-primary-text: #2E7D32; /* ciemniejszy tekstowy zielony */
+    --color-bg-main: #E8F9E6; /* delikatne tło ekologiczne */
+    --color-bg-active: #CFF4C8; /* akcentowe tło */
+    --color-secondary-accent: #4CAF50; /* drugi akcent */
+    --color-border-soft: #CFF4C8;
+
+    /* Mapowanie palety "blue" z Tailwind na odcienie zieleni z logo,
+       dzięki czemu klasy typu text-blue-500/bg-blue-50 itp. będą zielone */
+    --color-blue-50: #F0F9F1;
+    --color-blue-100: #DFF4DD;
+    --color-blue-200: #CFF0C9;
+    --color-blue-300: #A8E69A;
+    --color-blue-400: #85D46E;
+    --color-blue-500: var(--color-primary-accent);
+    --color-blue-600: #4BAE2E;
+    --color-blue-700: var(--color-primary-text);
+    --color-blue-800: #1F6B26;
+    --color-blue-900: #15491A;
+}
+
+body {
+    /* Plain white page background — interface elements keep colors */
+    background-color: #ffffff;
+    background-image: none;
+}
+
+.text-primary {
+    color: var(--color-primary-accent);
+}
+
+.text-primary-dark {
+    color: var(--color-primary-text);
+}
+
+.bg-primary-light {
+    background-color: var(--color-bg-active);
+}
+
+.themed-card {
+    border: 1px solid var(--color-bg-active);
+}
+
+.themed-input:focus {
+    --tw-ring-color: var(--color-primary-accent);
+}
+
+.themed-chart-placeholder {
+    background-color: var(--color-bg-active);
+}
+
+.themed-chart-placeholder p {
+    color: var(--color-primary-accent);
+    opacity: 0.6;
+}
+
+.sidebar-link {
+    color: var(--color-blue-700);
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.sidebar-link.active {
+    /* strong, high-contrast active state */
+    background-color: var(--color-blue-700);
+    color: white;
+    border-left: 4px solid var(--color-primary-accent);
+    padding-left: calc(1.5rem - 4px);
+    box-shadow: none;
+}
+
+.sidebar-link.active .sidebar-icon,
+.sidebar-link.active .sidebar-text {
+    color: white;
+    font-weight: 700;
+}
+
+.sidebar-link:not(.active):hover {
+    background-color: var(--color-bg-active);
+    color: var(--color-primary-text);
+    transform: translateX(0.5px);
+}
+
+
+.dropdown-link:hover {
+    background-color: var(--color-primary-accent);
+    color: white;
+}
+
+.themed-table-header {
+    border-bottom-color: var(--color-border-soft);
+}
+
+.themed-table-body {
+    divide-color: var(--color-border-soft);
+}
+
+.stat-icon-primary-bg {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+.stat-icon-green-bg {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+.stat-icon-emerald-bg {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+.stat-icon-red-bg {
+    background-color: rgba(239, 68, 68, 0.2);
+}
+
+.status-pill-blue {
+    background-color: var(--color-secondary-accent);
+    color: white;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.sidebar-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-link.active .sidebar-icon,
+.sidebar-link.active .sidebar-text {
+    color: white;
+}
+
+.sidebar-link:not(.active) .sidebar-icon {
+    color: #6b7280;
+}
+
+.sidebar-link:not(.active):hover .sidebar-icon {
+    color: var(--color-primary-accent);
+}
+
+[x-cloak] {
+    display: none !important;
+}

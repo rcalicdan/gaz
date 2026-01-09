@@ -1,0 +1,67 @@
+:root {
+    --color-primary-accent: #7BC143; /* główny jasny zielony z logo */
+    --color-primary-text: #2E7D32; /* ciemniejszy tekstowy zielony */
+    --color-bg-main: #E8F9E6; /* delikatne tło ekologiczne */
+    --color-bg-active: #CFF4C8; /* akcentowe tło */
+    --color-secondary-accent: #4CAF50; /* drugi akcent */
+    --color-border-soft: #CFF4C8;
+
+    /* Mapowanie palety "blue" z Tailwind na odcienie zieleni z logo */
+    --color-blue-50: #F0F9F1;
+    --color-blue-100: #DFF4DD;
+    --color-blue-200: #CFF0C9;
+    --color-blue-300: #A8E69A;
+    --color-blue-400: #85D46E;
+    --color-blue-500: var(--color-primary-accent);
+    --color-blue-600: #4BAE2E;
+    --color-blue-700: var(--color-primary-text);
+    --color-blue-800: #1F6B26;
+    --color-blue-900: #15491A;
+}
+
+body {
+    /* Subtle top green wash with white base */
+    background: linear-gradient(180deg, rgba(123,193,67,0.08) 0%, rgba(123,193,67,0.04) 15%, #ffffff 60%);
+    background-color: #ffffff;
+}
+
+.text-primary {
+    color: var(--color-primary-accent);
+}
+
+.text-primary-dark {
+    color: var(--color-primary-text);
+}
+
+.bg-primary-light {
+    background-color: var(--color-bg-main);
+}
+
+.themed-input {
+    background-color: #f3f4f6;
+    border-color: transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.themed-input:focus-within {
+    --tw-ring-color: var(--color-primary-accent);
+    background-color: #ffffff;
+    border-color: var(--color-primary-accent);
+}
+
+.btn-primary {
+    background-color: var(--color-primary-accent);
+    color: white;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-text);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.15);
+}
+
+[x-cloak] {
+    display: none !important;
+}

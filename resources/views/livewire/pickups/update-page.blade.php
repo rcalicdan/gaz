@@ -1,0 +1,119 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h2 class="text-xl font-semibold text-gray-900">{{ __('Edit Pickup') }} #{{ $pickup->id }}</h2>
+        </div>
+
+        <form wire:submit.prevent="update" class="p-6 space-y-8">
+            @if ($errors->any())
+                <div class="rounded-md bg-red-50 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">
+                                {{ __('There were errors with your submission') }}
+                            </h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <div class="space-y-6">
+                <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+                    {{ __('Pickup Information') }}
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <livewire:components.searchable-select :modelClass="\App\Models\Client::class" :selected="$client_id" name="client_id"
+                            label="{{ __('Client') }}" placeholder="{{ __('Search client by name, VAT, or city...') }}"
+                            displayField="company_name" :searchFields="['company_name', 'vat_id', 'city', 'contact_person']" :required="true" :key="'client-select-' . $pickup->id" />
+                    </div>
+
+                    <div>
+                        <livewire:components.searchable-select :modelClass="\App\Models\Driver::class" :selected="$assigned_driver_id"
+                            name="assigned_driver_id" label="{{ __('Driver') }}"
+                            placeholder="{{ __('Search driver...') }}" displayField="user.full_name" :searchFields="['user.first_name', 'user.last_name', 'user.email', 'license_number']"
+                            :required="false" :key="'driver-select-' . $pickup->id" />
+                    </div>
+
+                    <div>
+                        <livewire:components.searchable-select :modelClass="\App\Models\WasteType::class" :selected="$waste_type_id"
+                            name="waste_type_id" label="{{ __('Waste Type') }}"
+                            placeholder="{{ __('Search waste type...') }}" displayField="name" :searchFields="['name', 'code']"
+                            :required="true" :key="'waste-type-select-' . $pickup->id" />
+                    </div>
+
+                    <x-forms.field label="{{ __('Scheduled Date') }}" name="scheduled_date" required>
+                        <x-forms.input type="date" name="scheduled_date" wire:model="scheduled_date" required />
+                    </x-forms.field>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <x-forms.field label="{{ __('Status') }}" name="status" required>
+                        <x-forms.select name="status" wire:model="status" :options="\App\Enums\PickupStatus::options()" required />
+                    </x-forms.field>
+
+                    <x-forms.field label="{{ __('Sequence Order') }}" name="sequence_order">
+                        <x-forms.input type="number" name="sequence_order" wire:model="sequence_order"
+                            placeholder="{{ __('Optional') }}" />
+                    </x-forms.field>
+
+                    <x-forms.field label="{{ __('Actual Pickup Time') }}" name="actual_pickup_time">
+                        <x-forms.input type="datetime-local" name="actual_pickup_time"
+                            wire:model="actual_pickup_time" />
+                    </x-forms.field>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+                    {{ __('Pickup Details') }}
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <x-forms.field label="{{ __('Waste Quantity') }}" name="waste_quantity"
+                        help="{{ __('In kg or tons') }}">
+                        <x-forms.input type="number" step="0.01" name="waste_quantity" wire:model="waste_quantity"
+                            placeholder="{{ __('0.00') }}" />
+                    </x-forms.field>
+
+                    <x-forms.field label="{{ __('Applied Price Rate') }}" name="applied_price_rate"
+                        help="{{ __('Override price') }}">
+                        <x-forms.input type="number" step="0.01" name="applied_price_rate"
+                            wire:model="applied_price_rate" placeholder="{{ __('0.00') }}" />
+                    </x-forms.field>
+
+                    <x-forms.field label="{{ __('Certificate Number') }}" name="certificate_number">
+                        <x-forms.input type="text" name="certificate_number" wire:model="certificate_number"
+                            placeholder="{{ __('Certificate number') }}" />
+                    </x-forms.field>
+                </div>
+
+                <x-forms.field label="{{ __('Driver Notes') }}" name="driver_note">
+                    <x-forms.textarea name="driver_note" wire:model="driver_note"
+                        placeholder="{{ __('Enter any notes for the driver (optional)') }}" rows="3" />
+                </x-forms.field>
+            </div>
+
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <x-utils.link-button href="{{ route('pickups.view', $pickup->id) }}" buttonText="{{ __('Cancel') }}" />
+                <x-utils.submit-button wire-target="update" buttonText="{{ __('Update Pickup') }}"
+                    bgColor="bg-emerald-700" hoverColor="hover:bg-emerald-900" focusRing="focus:ring-emerald-600" />
+            </div>
+        </form>
+    </div>
+</div>
