@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\KpoDocument;
-use App\Models\Pickup;
 use TCPDF;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -118,7 +117,7 @@ class KpoPdfService
         $this->pdf->Ln(5);
     }
 
-    protected function addSenderSection(Pickup $pickup): void
+    protected function addSenderSection($pickup): void
     {
         $this->pdf->SetFillColor(41, 128, 185);
         $this->pdf->SetTextColor(255, 255, 255);
@@ -172,9 +171,6 @@ class KpoPdfService
         $this->pdf->SetTextColor(44, 62, 80);
         $this->pdf->SetFont('helvetica', '', 9);
         
-        $fullAddress = $client->street_name . ' ' . $client->street_number . ', ' . 
-                       $client->zip_code . ' ' . $client->city;
-        
         $html = '
         <table cellpadding="8" style="border: 1px solid #bdc3c7; background-color: #ffffff;">
             <tr>
@@ -197,7 +193,7 @@ class KpoPdfService
         $this->pdf->Ln(5);
     }
 
-    protected function addWasteDetails(KpoDocument $kpoDocument, Pickup $pickup): void
+    protected function addWasteDetails(KpoDocument $kpoDocument, $pickup): void
     {
         $this->pdf->SetFillColor(46, 204, 113);
         $this->pdf->SetTextColor(255, 255, 255);
@@ -273,56 +269,5 @@ class KpoPdfService
         $kpoNumber = $kpoDocument->kpo_number ?? $kpoDocument->id;
         
         return "KPO_{$kpoNumber}_{$date}_{$timestamp}.pdf";
-    }
-
-    public function downloadPdf(KpoDocument $kpoDocument): void
-    {
-        $kpoDocument->ensurePdfIsReady();
-        
-        if (!$kpoDocument->pdf_path || !Storage::exists($kpoDocument->pdf_path)) {
-            throw new \Exception('PDF file not found');
-        }
-        
-        $content = Storage::get($kpoDocument->pdf_path);
-        $filename = "KPO_{$kpoDocument->kpo_number}.pdf";
-
-        header('Content-Type: application/pdf');
-        header("Content-Disposition: attachment; filename=\"{$filename}\"");
-        header('Content-Length: ' . strlen($content));
-        header('Cache-Control: private, max-age=0, must-revalidate');
-        header('Pragma: public');
-        
-        echo $content;
-    }
-
-    public function previewPdf(KpoDocument $kpoDocument): void
-    {
-        $kpoDocument->ensurePdfIsReady();
-        
-        if (!$kpoDocument->pdf_path || !Storage::exists($kpoDocument->pdf_path)) {
-            throw new \Exception('PDF file not found');
-        }
-        
-        $content = Storage::get($kpoDocument->pdf_path);
-        $filename = "KPO_{$kpoDocument->kpo_number}.pdf";
-
-        header('Content-Type: application/pdf');
-        header("Content-Disposition: inline; filename=\"{$filename}\"");
-        header('Content-Length: ' . strlen($content));
-        header('Cache-Control: private, max-age=0, must-revalidate');
-        header('Pragma: public');
-        
-        echo $content;
-    }
-
-    public function getPdfContent(KpoDocument $kpoDocument): string
-    {
-        $kpoDocument->ensurePdfIsReady();
-        
-        if (!$kpoDocument->pdf_path || !Storage::exists($kpoDocument->pdf_path)) {
-            throw new \Exception('PDF file not found');
-        }
-        
-        return Storage::get($kpoDocument->pdf_path);
     }
 }

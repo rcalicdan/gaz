@@ -8,8 +8,9 @@ use App\Models\Pickup;
 use App\Services\KpoPdfService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class KpoDocumentController extends Controller
 {
@@ -245,64 +246,100 @@ class KpoDocumentController extends Controller
         }
     }
 
-    public function downloadPdf(KpoDocument $kpoDocument): Response
+    public function downloadPdf(KpoDocument $kpoDocument): BinaryFileResponse|JsonResponse
     {
         try {
-            $this->kpoPdfService->downloadPdf($kpoDocument);
-            exit;
+            if (!$kpoDocument->pdf_path || !Storage::exists($kpoDocument->pdf_path)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PDF file not found'
+                ], 404);
+            }
+
+            $filename = "KPO_{$kpoDocument->kpo_number}.pdf";
+            
+            return response()->download(
+                Storage::path($kpoDocument->pdf_path),
+                $filename,
+                [
+                    'Content-Type' => 'application/pdf',
+                ]
+            );
         } catch (\Exception $e) {
-            abort(500, 'Failed to download PDF: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to download PDF: ' . $e->getMessage()
+            ], 500);
         }
     }
 
-    public function previewPdf(KpoDocument $kpoDocument): Response
+    public function previewPdf(KpoDocument $kpoDocument): BinaryFileResponse|JsonResponse
     {
         try {
-            $this->kpoPdfService->previewPdf($kpoDocument);
-            exit;
+            if (!$kpoDocument->pdf_path || !Storage::exists($kpoDocument->pdf_path)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PDF file not found'
+                ], 404);
+            }
+
+            $filename = "KPO_{$kpoDocument->kpo_number}.pdf";
+            
+            return response()->file(
+                Storage::path($kpoDocument->pdf_path),
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $filename . '"'
+                ]
+            );
         } catch (\Exception $e) {
-            abort(500, 'Failed to preview PDF: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to preview PDF: ' . $e->getMessage()
+            ], 500);
         }
     }
 
-    public function downloadPdfByPickup(Pickup $pickup): Response
+    public function downloadPdfByPickup(Pickup $pickup): BinaryFileResponse|JsonResponse
     {
         if (!$this->canAccessPickup($pickup)) {
-            abort(403, 'Unauthorized.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.'
+            ], 403);
         }
 
         $kpoDocument = $pickup->kpoDocument;
 
         if (!$kpoDocument) {
-            abort(404, 'KPO document not found for this pickup.');
+            return response()->json([
+                'success' => false,
+                'message' => 'KPO document not found for this pickup.'
+            ], 404);
         }
 
-        try {
-            $this->kpoPdfService->downloadPdf($kpoDocument);
-            exit;
-        } catch (\Exception $e) {
-            abort(500, 'Failed to download PDF: ' . $e->getMessage());
-        }
+        return $this->downloadPdf($kpoDocument);
     }
 
-    public function previewPdfByPickup(Pickup $pickup): Response
+    public function previewPdfByPickup(Pickup $pickup): BinaryFileResponse|JsonResponse
     {
         if (!$this->canAccessPickup($pickup)) {
-            abort(403, 'Unauthorized.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.'
+            ], 403);
         }
 
         $kpoDocument = $pickup->kpoDocument;
 
         if (!$kpoDocument) {
-            abort(404, 'KPO document not found for this pickup.');
+            return response()->json([
+                'success' => false,
+                'message' => 'KPO document not found for this pickup.'
+            ], 404);
         }
 
-        try {
-            $this->kpoPdfService->previewPdf($kpoDocument);
-            exit;
-        } catch (\Exception $e) {
-            abort(500, 'Failed to preview PDF: ' . $e->getMessage());
-        }
+        return $this->previewPdf($kpoDocument);
     }
 
     private function canAccessPickup(Pickup $pickup): bool
