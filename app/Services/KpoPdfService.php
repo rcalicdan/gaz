@@ -34,6 +34,17 @@ class KpoPdfService
     public function generateKpoDocument(KpoDocument $kpoDocument): string
     {
         try {
+            if ($kpoDocument->pdf_path && Storage::exists($kpoDocument->pdf_path)) {
+                Storage::delete($kpoDocument->pdf_path);
+                Log::info('Deleted old PDF', [
+                    'kpo_id' => $kpoDocument->id,
+                    'old_path' => $kpoDocument->pdf_path
+                ]);
+            }
+
+            $kpoDocument->load(['pickup.driver.user', 'pickup.wasteType', 'client']);
+            
+            $this->initializePdf();
             $this->pdf->AddPage();
             
             $pickup = $kpoDocument->pickup;
@@ -51,13 +62,17 @@ class KpoPdfService
             $path = 'kpo-documents/' . $filename;
             Storage::put($path, $pdfContent);
             
-            $kpoDocument->update([
-                'pdf_url' => Storage::url($path)
+            $kpoDocument->updateQuietly([
+                'pdf_path' => $path,
+                'pdf_version' => ($kpoDocument->pdf_version ?? 0) + 1,
+                'pdf_generated_at' => now(),
             ]);
             
             Log::info('KPO PDF generated successfully', [
                 'kpo_id' => $kpoDocument->id,
-                'filename' => $filename
+                'filename' => $filename,
+                'path' => $path,
+                'version' => $kpoDocument->pdf_version,
             ]);
             
             return $path;
@@ -65,7 +80,8 @@ class KpoPdfService
         } catch (\Exception $e) {
             Log::error('Failed to generate KPO PDF', [
                 'kpo_id' => $kpoDocument->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             throw $e;
         }
@@ -252,27 +268,61 @@ class KpoPdfService
 
     protected function generateFilename(KpoDocument $kpoDocument): string
     {
-        $date = $kpoDocument->created_at->format('Y-m-d');
+        $date = now()->format('Y-m-d');
+        $timestamp = now()->timestamp;
         $kpoNumber = $kpoDocument->kpo_number ?? $kpoDocument->id;
         
-        return "KPO_{$kpoNumber}_{$date}.pdf";
+        return "KPO_{$kpoNumber}_{$date}_{$timestamp}.pdf";
     }
 
-    public function downloadPdf(KpoDocument $kpoDocument): string
+    public function downloadPdf(KpoDocument $kpoDocument): void
     {
-        $this->generateKpoDocument($kpoDocument);
-        return $this->pdf->Output($this->generateFilename($kpoDocument), 'D');
+        $kpoDocument->ensurePdfIsReady();
+        
+        if (!$kpoDocument->pdf_path || !Storage::exists($kpoDocument->pdf_path)) {
+            throw new \Exception('PDF file not found');
+        }
+        
+        $content = Storage::get($kpoDocument->pdf_path);
+        $filename = "KPO_{$kpoDocument->kpo_number}.pdf";
+
+        header('Content-Type: application/pdf');
+        header("Content-Disposition: attachment; filename=\"{$filename}\"");
+        header('Content-Length: ' . strlen($content));
+        header('Cache-Control: private, max-age=0, must-revalidate');
+        header('Pragma: public');
+        
+        echo $content;
     }
 
-    public function previewPdf(KpoDocument $kpoDocument): string
+    public function previewPdf(KpoDocument $kpoDocument): void
     {
-        $this->generateKpoDocument($kpoDocument);
-        return $this->pdf->Output($this->generateFilename($kpoDocument), 'I');
+        $kpoDocument->ensurePdfIsReady();
+        
+        if (!$kpoDocument->pdf_path || !Storage::exists($kpoDocument->pdf_path)) {
+            throw new \Exception('PDF file not found');
+        }
+        
+        $content = Storage::get($kpoDocument->pdf_path);
+        $filename = "KPO_{$kpoDocument->kpo_number}.pdf";
+
+        header('Content-Type: application/pdf');
+        header("Content-Disposition: inline; filename=\"{$filename}\"");
+        header('Content-Length: ' . strlen($content));
+        header('Cache-Control: private, max-age=0, must-revalidate');
+        header('Pragma: public');
+        
+        echo $content;
     }
 
     public function getPdfContent(KpoDocument $kpoDocument): string
     {
-        $this->generateKpoDocument($kpoDocument);
-        return $this->pdf->Output('', 'S');
+        $kpoDocument->ensurePdfIsReady();
+        
+        if (!$kpoDocument->pdf_path || !Storage::exists($kpoDocument->pdf_path)) {
+            throw new \Exception('PDF file not found');
+        }
+        
+        return Storage::get($kpoDocument->pdf_path);
     }
 }

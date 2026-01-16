@@ -19,7 +19,13 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     Route::prefix('kpo-documents')->group(function () {
+        Route::get('/', [KpoDocumentController::class, 'index']);
+        Route::get('/{kpoDocument}', [KpoDocumentController::class, 'show']);
+        Route::post('/generate-for-pickup/{pickup}', [KpoDocumentController::class, 'generatePdfForPickup']);
+        Route::post('/generate-my-pickup', [KpoDocumentController::class, 'generatePdfForMyPickup']);
         Route::post('/{kpoDocument}/generate-pdf', [KpoDocumentController::class, 'generatePdf']);
+        Route::get('/pickup/{pickup}/download', [KpoDocumentController::class, 'downloadPdfByPickup']);
+        Route::get('/pickup/{pickup}/preview', [KpoDocumentController::class, 'previewPdfByPickup']);
         Route::get('/{kpoDocument}/download', [KpoDocumentController::class, 'downloadPdf']);
         Route::get('/{kpoDocument}/preview', [KpoDocumentController::class, 'previewPdf']);
     });

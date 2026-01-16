@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Models\Client;
+use App\Models\KpoDocument;
 use App\Models\Pickup;
 use App\Models\Reminder;
 use App\Models\User;
 use App\Observers\ClientObserver;
+use App\Observers\KpoDocumentObserver;
 use App\Observers\PickupObserver;
 use App\Observers\ReminderObserver;
 use App\Observers\UserObserver;
@@ -25,5 +27,6 @@ class ObserverServiceProvider extends ServiceProvider
         Client::observe(ClientObserver::class);
         Pickup::observe(PickupObserver::class);
         Reminder::observe(ReminderObserver::class);
+        KpoDocument::observe(KpoDocumentObserver::class);
     }
 }
