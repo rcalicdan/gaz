@@ -28,6 +28,11 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/pickup/{pickup}/preview', [KpoDocumentController::class, 'previewPdfByPickup']);
         Route::get('/{kpoDocument}/download', [KpoDocumentController::class, 'downloadPdf']);
         Route::get('/{kpoDocument}/preview', [KpoDocumentController::class, 'previewPdf']);
+        Route::post('/{kpoDocument}/email-to-client', [KpoDocumentController::class, 'emailToClient']);
+        Route::post('/{kpoDocument}/email-to-custom', [KpoDocumentController::class, 'emailToCustomAddress']);
+        Route::get('/{kpoDocument}/email-history', [KpoDocumentController::class, 'emailHistory']);
+        Route::get('/{kpoDocument}/email-statistics', [KpoDocumentController::class, 'emailStatistics']);
+        Route::post('/email-logs/{emailLog}/retry', [KpoDocumentController::class, 'retryEmail']);
     });
 
     Route::prefix('route-data')->group(function () {

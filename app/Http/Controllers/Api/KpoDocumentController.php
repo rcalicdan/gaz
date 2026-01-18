@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DocumentType;
 use App\Http\Controllers\Controller;
+use App\Models\EmailLog;
 use App\Models\KpoDocument;
 use App\Models\Pickup;
+use App\Services\KpoEmailService;
 use App\Services\KpoPdfService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +18,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class KpoDocumentController extends Controller
 {
     public function __construct(
-        protected KpoPdfService $kpoPdfService
+        protected KpoPdfService $kpoPdfService,
+        protected KpoEmailService $kpoEmailService
     ) {}
 
     public function show(KpoDocument $kpoDocument): JsonResponse
@@ -132,7 +136,7 @@ class KpoDocumentController extends Controller
             );
 
             $path = $this->kpoPdfService->generateKpoDocument($kpoDocument);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'PDF generated successfully',
@@ -190,7 +194,7 @@ class KpoDocumentController extends Controller
             );
 
             $path = $this->kpoPdfService->generateKpoDocument($kpoDocument);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'PDF generated successfully',
@@ -221,9 +225,9 @@ class KpoDocumentController extends Controller
     {
         try {
             $path = $this->kpoPdfService->generateKpoDocument($kpoDocument);
-            
+
             $kpoDocument->refresh();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'PDF generated successfully',
@@ -257,7 +261,7 @@ class KpoDocumentController extends Controller
             }
 
             $filename = "KPO_{$kpoDocument->kpo_number}.pdf";
-            
+
             return response()->download(
                 Storage::path($kpoDocument->pdf_path),
                 $filename,
@@ -284,7 +288,7 @@ class KpoDocumentController extends Controller
             }
 
             $filename = "KPO_{$kpoDocument->kpo_number}.pdf";
-            
+
             return response()->file(
                 Storage::path($kpoDocument->pdf_path),
                 [
@@ -298,6 +302,171 @@ class KpoDocumentController extends Controller
                 'message' => 'Failed to preview PDF: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function emailToClient(KpoDocument $kpoDocument, Request $request): JsonResponse
+    {
+        if (!$kpoDocument->client || !$kpoDocument->client->email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Client email not found. Cannot send document.'
+            ], 400);
+        }
+
+        $validated = $request->validate([
+            'custom_message' => 'nullable|string|max:1000'
+        ]);
+
+        $success = $this->kpoEmailService->sendToClient(
+            $kpoDocument,
+            $validated['custom_message'] ?? null
+        );
+
+        if ($success) {
+            return response()->json([
+                'success' => true,
+                'message' => 'KPO document sent successfully to ' . $kpoDocument->client->email,
+                'data' => [
+                    'kpo_number' => $kpoDocument->kpo_number,
+                    'recipient_email' => $kpoDocument->client->email,
+                    'sent_at' => now()->toIso8601String()
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send KPO document. Please check logs.'
+        ], 500);
+    }
+
+    public function emailToCustomAddress(KpoDocument $kpoDocument, Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        if (!$user->canManage()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only administrators and employees can send documents to custom email addresses.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'recipient_email' => 'required|email',
+            'custom_message' => 'nullable|string|max:1000',
+            'authorization_reason' => 'required|string|max:500' 
+        ]);
+
+        $success = $this->kpoEmailService->sendToCustomEmail(
+            $kpoDocument,
+            $validated['recipient_email'],
+            $validated['custom_message'] ?? null,
+            $validated['authorization_reason']
+        );
+
+        if ($success) {
+            return response()->json([
+                'success' => true,
+                'message' => 'KPO document sent successfully to ' . $validated['recipient_email'],
+                'data' => [
+                    'kpo_number' => $kpoDocument->kpo_number,
+                    'recipient_email' => $validated['recipient_email'],
+                    'sent_at' => now()->toIso8601String(),
+                    'authorized_by' => $user->full_name
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send KPO document. Please check logs.'
+        ], 500);
+    }
+
+    public function emailHistory(KpoDocument $kpoDocument): JsonResponse
+    {
+        $history = $this->kpoEmailService->getEmailHistory($kpoDocument);
+
+        return response()->json([
+            'success' => true,
+            'data' => $history->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'recipient_email' => $log->recipient_email,
+                    'status' => [
+                        'value' => $log->status->value,
+                        'label' => $log->status->label(),
+                        'color' => $log->status->color(),
+                        'icon' => $log->status->icon(),
+                        'is_successful' => $log->status->isSuccessful(),
+                        'needs_retry' => $log->status->needsRetry(),
+                    ],
+                    'sent_at' => $log->sent_at?->toIso8601String(),
+                    'error_message' => $log->error_message,
+                    'sent_by' => $log->sentBy ? [
+                        'id' => $log->sentBy->id,
+                        'name' => $log->sentBy->full_name,
+                        'email' => $log->sentBy->email
+                    ] : null,
+                    'created_at' => $log->created_at->toIso8601String()
+                ];
+            })
+        ]);
+    }
+
+    public function retryEmail(EmailLog $emailLog, Request $request): JsonResponse
+    {
+        if ($emailLog->document_type !== DocumentType::KPO) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This endpoint only handles KPO documents.'
+            ], 400);
+        }
+
+        if (!$emailLog->status->needsRetry()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This email cannot be retried. Status: ' . $emailLog->status->label()
+            ], 400);
+        }
+
+        $validated = $request->validate([
+            'custom_message' => 'nullable|string|max:1000'
+        ]);
+
+        $success = $this->kpoEmailService->retryEmail(
+            $emailLog,
+            $validated['custom_message'] ?? null
+        );
+
+        if ($success) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Email retry sent successfully to ' . $emailLog->recipient_email,
+                'data' => [
+                    'original_email_log_id' => $emailLog->id,
+                    'recipient_email' => $emailLog->recipient_email,
+                    'retried_at' => now()->toIso8601String()
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retry email. Please check logs.'
+        ], 500);
+    }
+
+    public function emailStatistics(KpoDocument $kpoDocument): JsonResponse
+    {
+        $statistics = $this->kpoEmailService->getEmailStatistics($kpoDocument);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'kpo_number' => $kpoDocument->kpo_number,
+                'statistics' => $statistics
+            ]
+        ]);
     }
 
     public function downloadPdfByPickup(Pickup $pickup): BinaryFileResponse|JsonResponse
@@ -361,7 +530,7 @@ class KpoDocumentController extends Controller
     {
         return DB::transaction(function () {
             $year = now()->year;
-            
+
             $lastKpo = KpoDocument::whereYear('created_at', $year)
                 ->whereNotNull('kpo_number')
                 ->lockForUpdate()
