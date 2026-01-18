@@ -19,13 +19,13 @@ class UpdatePage extends Component
     public $zip_code = '';
     public $province = '';
     public $email = '';
-    public $phone_number = '';
     public $brand_category = '';
     public $default_waste_type_id = '';
     public $price_rate = '';
     public $tax_rate = '';
     public $auto_invoice = false;
     public $auto_kpo = false;
+    public $phoneNumbers = [];
 
     protected ClientService $clientService;
 
@@ -45,13 +45,53 @@ class UpdatePage extends Component
         $this->zip_code = $client->zip_code;
         $this->province = $client->province;
         $this->email = $client->email;
-        $this->phone_number = $client->phone_number;
         $this->brand_category = $client->brand_category;
         $this->default_waste_type_id = $client->default_waste_type_id;
         $this->price_rate = $client->price_rate;
         $this->tax_rate = $client->tax_rate;
         $this->auto_invoice = $client->auto_invoice;
         $this->auto_kpo = $client->auto_kpo;
+
+        $this->phoneNumbers = $client->phoneNumbers->map(function ($phone) {
+            return [
+                'id' => $phone->id,
+                'phone_number' => $phone->phone_number,
+                'label' => $phone->label,
+                'is_primary' => $phone->is_primary,
+            ];
+        })->toArray();
+
+        if (empty($this->phoneNumbers)) {
+            $this->phoneNumbers = [
+                ['phone_number' => '', 'label' => '', 'is_primary' => true]
+            ];
+        }
+    }
+
+    public function addPhoneNumber()
+    {
+        $this->phoneNumbers[] = ['phone_number' => '', 'label' => '', 'is_primary' => false];
+    }
+
+    public function removePhoneNumber($index)
+    {
+        if (count($this->phoneNumbers) > 1) {
+            unset($this->phoneNumbers[$index]);
+            $this->phoneNumbers = array_values($this->phoneNumbers); 
+            
+            if (!collect($this->phoneNumbers)->contains('is_primary', true) && count($this->phoneNumbers) > 0) {
+                $this->phoneNumbers[0]['is_primary'] = true;
+            }
+        }
+    }
+
+    public function setPrimary($index)
+    {
+        foreach ($this->phoneNumbers as $key => $phone) {
+            $this->phoneNumbers[$key]['is_primary'] = false;
+        }
+     
+        $this->phoneNumbers[$index]['is_primary'] = true;
     }
 
     public function rules()
@@ -65,19 +105,21 @@ class UpdatePage extends Component
             'zip_code' => 'required|string|max:20',
             'province' => 'nullable|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('clients')->ignore($this->client->id)],
-            'phone_number' => 'required|string|max:50',
             'brand_category' => 'nullable|string|max:255',
             'default_waste_type_id' => 'nullable|exists:waste_types,id',
             'price_rate' => 'nullable|numeric|min:0|max:999999.99',
             'tax_rate' => 'nullable|integer|min:0|max:100',
             'auto_invoice' => 'boolean',
             'auto_kpo' => 'boolean',
+            'phoneNumbers.*.phone_number' => 'required|string|max:50',
+            'phoneNumbers.*.label' => 'nullable|string|max:100',
+            'phoneNumbers.*.is_primary' => 'boolean',
         ];
     }
 
     public function validationAttributes()
     {
-        return [
+        $attributes = [
             'company_name' => 'company name',
             'vat_id' => 'VAT ID',
             'street_name' => 'street name',
@@ -86,7 +128,6 @@ class UpdatePage extends Component
             'zip_code' => 'zip code',
             'province' => 'province',
             'email' => 'email',
-            'phone_number' => 'phone number',
             'brand_category' => 'brand category',
             'default_waste_type_id' => 'default waste type',
             'price_rate' => 'price rate',
@@ -94,6 +135,13 @@ class UpdatePage extends Component
             'auto_invoice' => 'auto invoice',
             'auto_kpo' => 'auto KPO',
         ];
+
+        foreach ($this->phoneNumbers as $index => $phone) {
+            $attributes["phoneNumbers.{$index}.phone_number"] = 'phone number';
+            $attributes["phoneNumbers.{$index}.label"] = 'label';
+        }
+
+        return $attributes;
     }
 
     public function update()
@@ -110,7 +158,6 @@ class UpdatePage extends Component
             'zip_code' => $this->zip_code,
             'province' => $this->province,
             'email' => $this->email,
-            'phone_number' => $this->phone_number,
             'brand_category' => $this->brand_category,
             'default_waste_type_id' => $this->default_waste_type_id ?: null,
             'price_rate' => $this->price_rate ?: null,
@@ -121,6 +168,18 @@ class UpdatePage extends Component
 
         try {
             $this->clientService->updateClientInformation($this->client, $data);
+
+            $this->client->phoneNumbers()->delete();
+
+            foreach ($this->phoneNumbers as $phoneData) {
+                if (!empty($phoneData['phone_number'])) {
+                    $this->client->phoneNumbers()->create([
+                        'phone_number' => $phoneData['phone_number'],
+                        'label' => $phoneData['label'],
+                        'is_primary' => $phoneData['is_primary'],
+                    ]);
+                }
+            }
 
             session()->flash('success', __('Client has been successfully updated!'));
 

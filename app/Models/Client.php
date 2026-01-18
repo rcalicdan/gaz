@@ -17,6 +17,8 @@ class Client extends Model
     protected $fillable = [
         'company_name',
         'vat_id',
+        'contract_number',
+        'contract_signed_date',
         'street_name',
         'street_number',
         'city',
@@ -26,7 +28,7 @@ class Client extends Model
         'longitude',
         'contact_person',
         'email',
-        'phone_number',
+        // 'phone_number',
         'brand_category',
         'default_waste_type_id',
         'price_list_id',
@@ -52,6 +54,7 @@ class Client extends Model
             'auto_kpo' => 'boolean',
             'last_contact_date' => 'datetime',
             'last_pickup_date' => 'datetime',
+            'contract_signed_date' => 'date',
             'pickup_frequency' => \App\Enums\PickupFrequency::class,
         ];
     }
@@ -91,10 +94,121 @@ class Client extends Model
         return $this->hasMany(Reminder::class);
     }
 
+    public function phoneNumbers(): HasMany
+    {
+        return $this->hasMany(ClientPhoneNumber::class);
+    }
+
+    public function primaryPhoneNumber()
+    {
+        return $this->hasOne(ClientPhoneNumber::class)->where('is_primary', true);
+    }
+
+    public function getPrimaryPhoneAttribute(): ?string
+    {
+        return $this->primaryPhoneNumber?->phone_number;
+    }
+
     public function scopeNeedsContact($query, $days = 30)
     {
         return $query->where('last_contact_date', '<', now()->subDays($days))
             ->orWhereNull('last_contact_date');
+    }
+
+    public function scopeByContractNumber($query, string $contractNumber)
+    {
+        return $query->where('contract_number', $contractNumber);
+    }
+
+    public function scopeWithContract($query)
+    {
+        return $query->whereNotNull('contract_number')
+            ->whereNotNull('contract_signed_date');
+    }
+
+    public function scopeWithoutContract($query)
+    {
+        return $query->whereNull('contract_number')
+            ->orWhereNull('contract_signed_date');
+    }
+
+    public function scopeContractSignedBetween($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('contract_signed_date', [$startDate, $endDate]);
+    }
+
+    public function scopeContractSignedBefore($query, $date)
+    {
+        return $query->where('contract_signed_date', '<', $date);
+    }
+
+    public function scopeContractSignedAfter($query, $date)
+    {
+        return $query->where('contract_signed_date', '>', $date);
+    }
+
+    public function hasContract(): bool
+    {
+        return !is_null($this->contract_number) && !is_null($this->contract_signed_date);
+    }
+
+    public function getContractAgeInDaysAttribute(): ?int
+    {
+        if (!$this->contract_signed_date) {
+            return null;
+        }
+        return $this->contract_signed_date->diffInDays(now());
+    }
+
+    public function getContractAgeInMonthsAttribute(): ?int
+    {
+        if (!$this->contract_signed_date) {
+            return null;
+        }
+        return $this->contract_signed_date->diffInMonths(now());
+    }
+
+    public function getContractAgeInYearsAttribute(): ?float
+    {
+        if (!$this->contract_signed_date) {
+            return null;
+        }
+        return round($this->contract_signed_date->diffInYears(now(), true), 1);
+    }
+
+    public function getContractAgeFormattedAttribute(): ?string
+    {
+        if (!$this->contract_signed_date) {
+            return null;
+        }
+
+        $years = $this->contract_signed_date->diffInYears(now());
+        $months = $this->contract_signed_date->diffInMonths(now()) % 12;
+        $days = $this->contract_signed_date->copy()->addMonths($years * 12 + $months)->diffInDays(now());
+
+        $parts = [];
+
+        if ($years > 0) {
+            $parts[] = $years . ' year' . ($years > 1 ? 's' : '');
+        }
+
+        if ($months > 0) {
+            $parts[] = $months . ' month' . ($months > 1 ? 's' : '');
+        }
+
+        if ($days > 0 && $years === 0) {
+            $parts[] = $days . ' day' . ($days > 1 ? 's' : '');
+        }
+
+        return !empty($parts) ? implode(', ', $parts) : 'Today';
+    }
+
+    public function getContractSignedDateFormattedAttribute(): ?string
+    {
+        if (!$this->contract_signed_date) {
+            return null;
+        }
+        return $this->contract_signed_date->format('d.m.Y');
     }
 
     public function getFullAddressAttribute(): string
