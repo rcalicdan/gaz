@@ -13,28 +13,32 @@ class ClientFactory extends Factory
 
     public function definition(): array
     {
-        $cities = [
-            ['city' => 'Quezon City', 'province' => 'Metro Manila', 'lat' => 14.6760, 'lng' => 121.0437],
-            ['city' => 'Manila', 'province' => 'Metro Manila', 'lat' => 14.5995, 'lng' => 120.9842],
-            ['city' => 'Makati', 'province' => 'Metro Manila', 'lat' => 14.5547, 'lng' => 121.0244],
-            ['city' => 'Pasig', 'province' => 'Metro Manila', 'lat' => 14.5764, 'lng' => 121.0851],
+        $locations = [
+            ['city' => 'Warszawa', 'province' => 'Mazowieckie', 'lat' => 52.2302, 'lng' => 21.0032], 
+            ['city' => 'Warszawa', 'province' => 'Mazowieckie', 'lat' => 52.2497, 'lng' => 21.0122],
+            ['city' => 'Kraków', 'province' => 'Małopolskie', 'lat' => 50.0681, 'lng' => 19.9479], 
+            ['city' => 'Gdańsk', 'province' => 'Pomorskie', 'lat' => 54.3478, 'lng' => 18.6496],
+            ['city' => 'Wrocław', 'province' => 'Dolnośląskie', 'lat' => 51.0964, 'lng' => 17.0374],
+            ['city' => 'Poznań', 'province' => 'Wielkopolskie', 'lat' => 52.4006, 'lng' => 16.9272],
         ];
 
-        $location = fake()->randomElement($cities);
+        $location = fake()->randomElement($locations);
+        $plFaker = fake('pl_PL'); 
 
         return [
-            'company_name' => fake()->company(),
-            'vat_id' => fake()->numerify('PL##########'), 
-            'street_name' => fake()->streetName(),
-            'street_number' => fake()->buildingNumber(),
+            'company_name' => $plFaker->company(),
+            'vat_id' => $plFaker->numerify('PL##########'), 
+            'street_name' => $plFaker->streetName(),
+            'street_number' => $plFaker->buildingNumber(),
             'city' => $location['city'],
-            'zip_code' => fake()->postcode(),
+            'zip_code' => $plFaker->postcode(), 
             'province' => $location['province'],
-            'latitude' => $location['lat'] + fake()->randomFloat(4, -0.05, 0.05),
-            'longitude' => $location['lng'] + fake()->randomFloat(4, -0.05, 0.05),
-            'contact_person' => fake()->name(),
+            
+            'latitude' => $location['lat'] + fake()->randomFloat(6, -0.002, 0.002),
+            'longitude' => $location['lng'] + fake()->randomFloat(6, -0.002, 0.002),
+            
+            'contact_person' => $plFaker->name(),
             'email' => fake()->unique()->companyEmail(),
-            'phone_number' => fake()->phoneNumber(),
             'brand_category' => fake()->optional()->randomElement(['Restaurant', 'Retail', 'Office', 'Manufacturing']),
             'default_waste_type_id' => WasteType::factory(),
             'price_list_id' => PriceList::factory(),
@@ -53,8 +57,8 @@ class ClientFactory extends Factory
     public function withCoordinates(): static
     {
         return $this->state(fn (array $attributes) => [
-            'latitude' => fake()->latitude(14.4, 14.8),
-            'longitude' => fake()->longitude(120.9, 121.2),
+            'latitude' => fake()->latitude(49.0, 54.8), 
+            'longitude' => fake()->longitude(14.1, 24.1),
         ]);
     }
 

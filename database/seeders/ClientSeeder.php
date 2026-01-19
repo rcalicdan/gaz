@@ -19,20 +19,64 @@ class ClientSeeder extends Seeder
             return;
         }
 
-        Client::factory()
-            ->count(20)
-            ->withCoordinates()
-            ->create([
-                'price_list_id' => $priceList->id,
-                'default_waste_type_id' => $wasteType->id,
-            ]);
+        $hubs = [
+            ['city' => 'Warszawa', 'province' => 'Mazowieckie', 'lat' => 52.2302, 'lng' => 21.0032],
+            ['city' => 'Kraków', 'province' => 'Małopolskie', 'lat' => 50.0681, 'lng' => 19.9479],
+            ['city' => 'Gdańsk', 'province' => 'Pomorskie', 'lat' => 54.3478, 'lng' => 18.6496],
+            ['city' => 'Wrocław', 'province' => 'Dolnośląskie', 'lat' => 51.0964, 'lng' => 17.0374],
+            ['city' => 'Poznań', 'province' => 'Wielkopolskie', 'lat' => 52.4006, 'lng' => 16.9272],
+        ];
 
-        Client::factory()
-            ->count(5)
+        $fakerPl = fake('pl_PL');
+
+        foreach ($hubs as $hub) {
+            $clients = Client::factory()
+                ->count(5)
+                ->state(function (array $attributes) use ($hub) {
+                    return [
+                        'city' => $hub['city'],
+                        'province' => $hub['province'],
+                        'latitude' => $hub['lat'] + fake()->randomFloat(5, -0.04, 0.04),
+                        'longitude' => $hub['lng'] + fake()->randomFloat(5, -0.06, 0.06),
+                    ];
+                })
+                ->create([
+                    'price_list_id' => $priceList->id,
+                    'default_waste_type_id' => $wasteType->id,
+                ]);
+
+            $this->addPhoneNumbersToClients($clients, $fakerPl);
+        }
+
+        $unlocatedClients = Client::factory()
+            ->count(3)
             ->withoutCoordinates()
             ->create([
                 'price_list_id' => $priceList->id,
                 'default_waste_type_id' => $wasteType->id,
             ]);
+
+        $this->addPhoneNumbersToClients($unlocatedClients, $fakerPl);
+            
+        $this->command->info('Clients and phone numbers seeded successfully across ' . count($hubs) . ' Polish cities.');
+    }
+
+    private function addPhoneNumbersToClients($clients, $faker)
+    {
+        foreach ($clients as $client) {
+            $client->phoneNumbers()->create([
+                'phone_number' => '+48 ' . $faker->numerify('### ### ###'),
+                'label' => 'Main',
+                'is_primary' => true,
+            ]);
+
+            if (fake()->boolean(30)) {
+                $client->phoneNumbers()->create([
+                    'phone_number' => '+48 ' . $faker->numerify('### ### ###'),
+                    'label' => fake()->randomElement(['Mobile', 'Billing', 'Logistics']),
+                    'is_primary' => false,
+                ]);
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('routeOptimizer', () => ({
         loading: false,
         dataLoaded: false,
+        mapReady: false,
 
         drivers: [],
         selectedDriver: null,
@@ -24,15 +25,16 @@ document.addEventListener('alpine:init', () => {
             this.dataService = new RouteDataService();
             this.optimizer = new RouteOptimizerService(this);
 
-            await this.loadDrivers();
-
-            this.$nextTick(() => {
+            this.$nextTick(async () => {
                 this.mapManager = new MapManager(this);
                 this.mapManager.init();
-            });
+                this.mapReady = true;
 
-            this.$watch('selectedDate', () => this.updateOrders());
-            this.$watch('selectedDriver', () => this.updateOrders());
+                await this.loadDrivers();
+
+                this.$watch('selectedDate', () => this.updateOrders());
+                this.$watch('selectedDriver', () => this.updateOrders());
+            });
         },
 
         get executiveSummary() {
@@ -62,7 +64,9 @@ document.addEventListener('alpine:init', () => {
                 this.drivers = await this.dataService.getDrivers();
                 if (this.drivers.length > 0) {
                     this.selectedDriver = this.drivers[0];
-                    await this.updateOrders();
+                    if (this.mapReady) {
+                        await this.updateOrders();
+                    }
                 }
                 this.dataLoaded = true;
             } catch (e) {
@@ -74,6 +78,12 @@ document.addEventListener('alpine:init', () => {
 
         async updateOrders(skipSavedRoute = false) {
             if (!this.selectedDriver || !this.selectedDate) return;
+
+            // Wait for map to be ready
+            if (!this.mapReady) {
+                console.warn('Map not ready yet, skipping updateOrders');
+                return;
+            }
 
             this.loading = true;
             this.optimizationResult = null;
@@ -96,13 +106,17 @@ document.addEventListener('alpine:init', () => {
                     if (savedOpt) {
                         this.restoreSavedRoute(savedOpt);
                     } else {
-                        this.mapManager?.refreshMarkers();
-                        this.mapManager?.clearRoute();
+                        if (this.mapManager) {
+                            this.mapManager.refreshMarkers();
+                            this.mapManager.clearRoute();
+                        }
                     }
                 } else {
                     this.$nextTick(() => {
-                        this.mapManager?.refreshMarkers();
-                        this.mapManager?.clearRoute();
+                        if (this.mapManager) {
+                            this.mapManager.refreshMarkers();
+                            this.mapManager.clearRoute();
+                        }
                     });
                 }
 
@@ -169,14 +183,26 @@ document.addEventListener('alpine:init', () => {
             this.manualEditMode = savedOpt.is_manual_edit || false;
 
             this.$nextTick(() => {
-                this.mapManager.refreshMarkers();
-                if (this.optimizationResult?.geometry) {
-                    this.mapManager.visualizeOptimizedRoute();
-                }
+                setTimeout(() => {
+                    if (this.mapManager) {
+                        this.mapManager.refreshMarkers();
+
+                        if (this.optimizationResult?.geometry) {
+                            setTimeout(() => {
+                                this.mapManager.visualizeOptimizedRoute();
+                            }, 150);
+                        }
+                    }
+                }, 100);
             });
         },
 
         async optimizeRoutes() {
+            if (!this.mapManager) {
+                alert('Mapa nie jest jeszcze gotowa');
+                return;
+            }
+
             this.loading = true;
             this.optimizationError = null;
 
@@ -323,6 +349,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         toggleManualEdit() {
+            if (!this.mapManager) {
+                alert('Mapa nie jest jeszcze gotowa');
+                return;
+            }
+
             this.manualEditMode = !this.manualEditMode;
             if (this.manualEditMode) {
                 this.mapManager.enableManualEdit();
@@ -338,12 +369,14 @@ document.addEventListener('alpine:init', () => {
             this.newOrdersCount = 0;
             this.optimizationError = null;
 
-            if (this.manualEditMode) {
+            if (this.manualEditMode && this.mapManager) {
                 this.manualEditMode = false;
                 this.mapManager.disableManualEdit();
             }
 
-            this.mapManager?.clearRoute();
+            if (this.mapManager) {
+                this.mapManager.clearRoute();
+            }
 
             this.updateOrders(true);
         },
@@ -352,7 +385,9 @@ document.addEventListener('alpine:init', () => {
             if (confirm("Czy na pewno chcesz zresetować trasę?")) {
                 this.optimizationResult = null;
                 this.showRouteSummary = false;
-                this.mapManager.clearRoute();
+                if (this.mapManager) {
+                    this.mapManager.clearRoute();
+                }
                 this.updateOrders();
             }
         },
@@ -386,7 +421,9 @@ document.addEventListener('alpine:init', () => {
 
             document.querySelectorAll('.route-card').forEach(el => el.classList.remove('opacity-50'));
 
-            this.mapManager.clearRoute();
+            if (this.mapManager) {
+                this.mapManager.clearRoute();
+            }
         },
 
         addCustomStop(lat, lng) {
@@ -410,7 +447,10 @@ document.addEventListener('alpine:init', () => {
 
             this.orders.push(newStop);
             this.routeNeedsReoptimization = true;
-            this.mapManager.refreshMarkers();
+
+            if (this.mapManager) {
+                this.mapManager.refreshMarkers();
+            }
         }
     }));
 });
