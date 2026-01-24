@@ -4,9 +4,9 @@ class MapManager {
         this.map = null;
         this.markers = [];
         this.routePolyline = null;
-        this.depotCoordinates = [52.2297, 21.0122];
+        this.depotCoordinates = [50.8665, 21.1476];
         this.editMode = false;
-        this.isUpdating = false; 
+        this.isUpdating = false;
 
         this.colors = {
             depot: '#1f2937',
@@ -33,7 +33,7 @@ class MapManager {
         }).addTo(this.map);
 
         this.addDepotMarker();
-        
+
         setTimeout(() => {
             this.map.invalidateSize();
             this.refreshMarkers();
@@ -57,7 +57,7 @@ class MapManager {
 
     refreshMarkers() {
         if (!this.map || this.isUpdating) return;
-        
+
         this.isUpdating = true;
 
         try {
@@ -111,7 +111,7 @@ class MapManager {
                     ${pickup.isCustom ? '<div class="text-xs text-purple-600 font-semibold">✓ Punkt Dodatkowy</div>' : ''}
                     ${pickup.isNewOrder ? '<div class="text-xs text-red-600 font-semibold">⚠ Nowe Zamówienie</div>' : ''}
                     <div class="text-xs font-semibold text-emerald-600">
-                        <i class="fas fa-recycle"></i> ${pickup.waste_type} 
+                        <i class="fas fa-recycle"></i> ${pickup.waste_type}
                         (${parseFloat(pickup.waste_quantity).toFixed(2)} kg)
                     </div>
                 </div>
@@ -123,12 +123,37 @@ class MapManager {
                     marker.on('dragend', (event) => {
                         try {
                             const position = event.target.getLatLng();
-                            pickup.coordinates = [position.lat, position.lng];
-                            
-                            pickup.address = `Współrzędne: ${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`;
-                            
+
+                            const newCoords = [position.lat, position.lng];
+                            pickup.coordinates = newCoords;
+
+                            pickup.vroom_coordinates = [position.lng, position.lat];
+
+                            pickup.address = pickup.isCustom
+                                ? `Współrzędne: ${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`
+                                : `${pickup.address} (Przesunięty)`;
+
+                            pickup.manuallyEdited = true;
+                            pickup.original_coordinates = pickup.original_coordinates ||
+                                (pickup.client?.coordinates || pickup.coordinates);
+
                             this.data.routeNeedsReoptimization = true;
-                            
+
+                            const popupContent = `
+                             <div class="p-1">
+                               <div class="font-bold text-gray-800">#${index + 1} ${pickup.client_name}</div>
+                               <div class="text-xs text-gray-500 mb-1">${pickup.address}</div>
+                                ${pickup.isCustom ? '<div class="text-xs text-purple-600 font-semibold">✓ Punkt Dodatkowy</div>' : ''}
+                                ${pickup.manuallyEdited ? '<div class="text-xs text-orange-600 font-semibold">✏️ Przesunięty</div>' : ''}
+                                ${pickup.isNewOrder ? '<div class="text-xs text-red-600 font-semibold">⚠ Nowe Zamówienie</div>' : ''}
+                              <div class="text-xs font-semibold text-emerald-600">
+                              <i class="fas fa-recycle"></i> ${pickup.waste_type}
+                             (${parseFloat(pickup.waste_quantity).toFixed(2)} kg)
+                             </div>
+                            </div>
+                             `;
+                            marker.setPopupContent(popupContent);
+
                             if (this.data.saveManualChanges) {
                                 this.data.saveManualChanges(true);
                             }
@@ -152,7 +177,7 @@ class MapManager {
 
     visualizeOptimizedRoute() {
         if (!this.map || this.isUpdating) return;
-        
+
         this.clearRoute();
 
         if (!this.data.optimizationResult || !this.data.optimizationResult.geometry) return;
@@ -172,7 +197,7 @@ class MapManager {
             setTimeout(() => {
                 if (this.routePolyline && this.map) {
                     try {
-                        this.map.fitBounds(this.routePolyline.getBounds(), { 
+                        this.map.fitBounds(this.routePolyline.getBounds(), {
                             padding: [50, 50],
                             animate: true,
                             duration: 0.5
@@ -227,18 +252,18 @@ class MapManager {
     disableManualEdit() {
         this.editMode = false;
         this.map.getContainer().style.cursor = '';
-        
+
         if (this.mapClickHandler) {
             this.map.off('click', this.mapClickHandler);
             this.mapClickHandler = null;
         }
-        
+
         setTimeout(() => {
             if (this.map) {
                 this.map.invalidateSize();
             }
         }, 100);
-        
+
         this.refreshMarkers();
     }
 

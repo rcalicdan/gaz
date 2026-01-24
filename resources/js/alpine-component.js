@@ -145,8 +145,16 @@ document.addEventListener('alpine:init', () => {
                         status: 'custom',
                         has_coordinates: true,
                         coordinates: coords,
+                        vroom_coordinates: [coords[1], coords[0]],
                         waste_quantity: parseFloat(stop.waste_quantity) || 0
                     };
+                });
+            }
+
+            const editedCoordsMap = new Map();
+            if (savedOpt.manual_modifications?.edited_coordinates) {
+                savedOpt.manual_modifications.edited_coordinates.forEach(edit => {
+                    editedCoordsMap.set(String(edit.id), edit);
                 });
             }
 
@@ -160,7 +168,17 @@ document.addEventListener('alpine:init', () => {
             savedSequenceIds.forEach(id => {
                 const strId = String(id);
                 if (pointMap.has(strId) && !processedIds.has(strId)) {
-                    newSequence.push(pointMap.get(strId));
+                    let point = pointMap.get(strId);
+
+                    if (editedCoordsMap.has(strId)) {
+                        const edit = editedCoordsMap.get(strId);
+                        point.coordinates = edit.modified_coordinates;
+                        point.vroom_coordinates = edit.vroom_coordinates;
+                        point.original_coordinates = edit.original_coordinates;
+                        point.manuallyEdited = true;
+                    }
+
+                    newSequence.push(point);
                     processedIds.add(strId);
                     pointMap.delete(strId);
                 }
@@ -266,12 +284,21 @@ document.addEventListener('alpine:init', () => {
                 })
                 .filter(stop => stop !== null);
 
+            const editedCoordinates = this.orders
+                .filter(o => !o.isCustom && o.manuallyEdited)
+                .map(o => ({
+                    id: o.id,
+                    original_coordinates: o.original_coordinates,
+                    modified_coordinates: o.coordinates,
+                    vroom_coordinates: o.vroom_coordinates || [o.coordinates[1], o.coordinates[0]]
+                }));
+
             const requiresOptimization = isManual && !this.optimizationResult;
 
             const data = {
                 driver_id: this.selectedDriver.id,
                 optimization_date: this.selectedDate,
-                optimization_result: this.optimizationResult || {},
+                optimization_result: this.optimizationResult || null,
                 order_sequence: this.orders.map(o => o.id),
                 total_distance: this.optimizationResult?.total_distance || null,
                 total_time: this.optimizationResult?.total_time || null,
@@ -279,17 +306,22 @@ document.addEventListener('alpine:init', () => {
                 manual_modifications: {
                     requires_optimization: requiresOptimization,
                     custom_stops: customStops,
+                    edited_coordinates: editedCoordinates,
                     modification_timestamp: new Date().toISOString()
                 }
             };
 
             try {
                 await this.dataService.saveOptimization(data);
+
                 if (isManual) {
-                    alert(requiresOptimization
-                        ? "Zmiany zapisane. Trasa wymaga optymalizacji."
-                        : "Zmiany zapisane pomyślnie.");
+                    if (requiresOptimization) {
+                        alert("Zmiany zapisane. Trasa wymaga optymalizacji.");
+                    } else {
+                        alert("Zmiany zapisane pomyślnie.");
+                    }
                 }
+
                 this.routeNeedsReoptimization = requiresOptimization;
             } catch (e) {
                 console.error('Save error:', e);
@@ -381,14 +413,39 @@ document.addEventListener('alpine:init', () => {
             this.updateOrders(true);
         },
 
-        resetOptimization() {
-            if (confirm("Czy na pewno chcesz zresetować trasę?")) {
-                this.optimizationResult = null;
-                this.showRouteSummary = false;
-                if (this.mapManager) {
-                    this.mapManager.clearRoute();
+        async resetOptimization() {
+            if (confirm("Czy na pewno chcesz zresetować i usunąć zapisaną trasę?")) {
+                this.loading = true;
+
+                try {
+                    await this.dataService.deleteSavedOptimization(
+                        this.selectedDriver.id,
+                        this.selectedDate
+                    );
+                    this.optimizationResult = null;
+                    this.showRouteSummary = false;
+                    this.routeNeedsReoptimization = false;
+                    this.newOrdersCount = 0;
+
+                    if (this.manualEditMode) {
+                        this.manualEditMode = false;
+                        if (this.mapManager) {
+                            this.mapManager.disableManualEdit();
+                        }
+                    }
+
+                    if (this.mapManager) {
+                        this.mapManager.clearRoute();
+                    }
+
+                    await this.updateOrders(true);
+
+                } catch (e) {
+                    console.error('Error resetting optimization:', e);
+                    alert('Błąd podczas resetowania trasy: ' + e.message);
+                } finally {
+                    this.loading = false;
                 }
-                this.updateOrders();
             }
         },
 
@@ -405,25 +462,62 @@ document.addEventListener('alpine:init', () => {
         },
 
         onDragStart(index, event) {
+            if (!this.manualEditMode) {
+                event.preventDefault();
+                return;
+            }
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', index);
-            event.target.classList.add('opacity-50');
+            event.dataTransfer.setDragImage(event.target, 0, 0);
         },
 
         onDragOver(event) {
             event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
         },
 
         onDrop(index, event) {
+            event.preventDefault();
+            if (!this.manualEditMode) return;
+
             const fromIndex = parseInt(event.dataTransfer.getData('text/plain'));
+            if (isNaN(fromIndex) || fromIndex === index) return;
+
+            // Reorder orders array
             const element = this.orders.splice(fromIndex, 1)[0];
             this.orders.splice(index, 0, element);
 
-            document.querySelectorAll('.route-card').forEach(el => el.classList.remove('opacity-50'));
+            // Jeśli mamy wynik optymalizacji, trzeba zsynchronizować kolejność route_steps
+            if (this.optimizationResult && this.optimizationResult.route_steps) {
+                // Mapuj orders na route_steps bazując na job ID
+                const jobToStep = new Map(
+                    this.optimizationResult.route_steps.map(step =>
+                        [String(step.job), step]
+                    )
+                );
+
+                const newSteps = [];
+                this.orders.forEach(order => {
+                    const step = jobToStep.get(String(order.id));
+                    if (step) {
+                        newSteps.push(step);
+                    }
+                });
+
+                // Tylko jeśli znaleźliśmy wszystkie kroki, zaaplikuj nową kolejność
+                if (newSteps.length === this.optimizationResult.route_steps.length) {
+                    this.optimizationResult.route_steps = newSteps;
+                }
+            }
 
             if (this.mapManager) {
                 this.mapManager.clearRoute();
             }
+
+            // Wymuś ponowne renderowanie
+            this.$nextTick(() => {
+                this.routeNeedsReoptimization = true;
+            });
         },
 
         addCustomStop(lat, lng) {

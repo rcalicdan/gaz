@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 
 class RouteDataService
 {
-    protected array $depotCoordinates = [21.0122, 52.2297];
+    protected array $depotCoordinates = [21.1476, 50.8665];
     protected string $vroomEndpoint = 'http://147.135.252.51:3000';
 
     public function getAllDrivers(): Collection
@@ -70,7 +70,7 @@ class RouteDataService
                     if (is_object($stop['coordinates'])) {
                         $stop['coordinates'] = array_values((array)$stop['coordinates']);
                     }
-                  
+
                     $stop['coordinates'] = array_map('floatval', $stop['coordinates']);
                 }
                 return $stop;
@@ -81,13 +81,18 @@ class RouteDataService
         $sequence = $data['pickup_sequence'] ?? [];
         $sequence = array_map('strval', $sequence);
 
+        $optimizationResult = $data['optimization_result'] ?? null;
+        if (empty($optimizationResult) || $optimizationResult === []) {
+            $optimizationResult = null;
+        }
+
         return RouteOptimization::updateOrCreate(
             [
                 'driver_id' => $data['driver_id'],
                 'optimization_date' => $data['optimization_date']
             ],
             [
-                'optimization_result' => $data['optimization_result'],
+                'optimization_result' => $optimizationResult, // Can be null now
                 'pickup_sequence' => $sequence,
                 'total_distance' => $data['total_distance'] ?? null,
                 'total_time' => $data['total_time'] ?? null,

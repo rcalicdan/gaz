@@ -44,6 +44,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/save-optimization', [RouteDataController::class, 'saveRouteOptimization']);
         Route::get('/saved-optimization', [RouteDataController::class, 'getSavedRouteOptimization']);
         Route::get('/driver-optimizations', [RouteDataController::class, 'getMyRouteOptimizations']);
+        Route::delete('/delete-optimization', [RouteDataController::class, 'deleteSavedRouteOptimization']);
     });
 
     Route::post('vroom/optimize', [RouteDataController::class, 'optimize']);

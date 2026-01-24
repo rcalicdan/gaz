@@ -55,14 +55,20 @@ class ClientObserver
             return;
         }
 
-        defer(function () use ($client, $action) {
-            $this->performDeferredGeocoding($client, $action);
-        });
+        // Sprawdź, czy jesteśmy w kontekście Octane/Swoole
+        if (function_exists('defer') && app()->bound('octane')) {
+            defer(function () use ($client, $action) {
+                $this->performDeferredGeocoding($client, $action);
+            });
 
-        Log::info("Geocoding queued for deferred processing", [
-            'client_id' => $client->id,
-            'action' => $action
-        ]);
+            Log::info("Geocoding queued for deferred processing", [
+                'client_id' => $client->id,
+                'action' => $action
+            ]);
+        } else {
+            // Podczas seedowania lub bez Octane, wykonaj bezpośrednio
+            $this->performDeferredGeocoding($client, $action);
+        }
     }
 
     private function performDeferredGeocoding(Client $client, string $action): void

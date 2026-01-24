@@ -14,19 +14,33 @@
             <div class="p-3 border rounded-lg transition-all hover:shadow-sm relative group bg-white"
                 :class="{
                     'border-red-300 bg-red-50': !pickup.has_coordinates && !pickup.isCustom,
-                    'border-gray-200': pickup.has_coordinates || pickup.isCustom
-                }">
-                
-                <div class="flex justify-between items-start gap-3">
+                    'border-gray-200': pickup.has_coordinates || pickup.isCustom,
+                    'opacity-75 border-emerald-400 bg-emerald-50 shadow-md': manualEditMode,
+                    'cursor-grab': manualEditMode,
+                    'cursor-grabbing': manualEditMode
+                }"
+                :draggable="manualEditMode"
+                @dragstart="onDragStart(index, $event)"
+                @dragover="onDragOver($event)"
+                @drop="onDrop(index, $event)"
+                @dragend="$event.target.classList.remove('opacity-50')"
+                :style="manualEditMode ? 'cursor: grab; user-select: none;' : 'cursor: default;'">
+
+                <!-- Drag Handle When in Edit Mode -->
+                <div x-show="manualEditMode" class="absolute left-2 top-1/2 transform -translate-y-1/2 text-emerald-600 opacity-60">
+                    <i class="fas fa-grip-vertical"></i>
+                </div>
+
+                <div class="flex justify-between items-start gap-3" :style="manualEditMode ? 'margin-left: 24px;' : ''">
                     <div class="flex-shrink-0 mt-1">
-                        <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center border border-gray-300" 
+                        <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center border border-gray-300"
                               x-text="index + 1"></span>
                     </div>
 
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between mb-1">
                             <span class="font-semibold text-gray-900 text-sm truncate" x-text="pickup.client_name"></span>
-                            
+
                             <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded"
                                 :class="{
                                     'bg-yellow-100 text-yellow-700': pickup.status === 'scheduled',

@@ -2,7 +2,7 @@ class RouteDataService {
     constructor() {
         this.baseUrl = '/api/route-data';
         this.cache = new Map();
-        this.cacheTimeout = 5 * 60 * 1000; 
+        this.cacheTimeout = 5 * 60 * 1000;
     }
 
     getHeaders() {
@@ -23,14 +23,14 @@ class RouteDataService {
 
         try {
             const response = await fetch(url, config);
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
-            return data; 
+            return data;
         } catch (error) {
             console.error('API Request Failed:', error);
             throw error;
@@ -73,6 +73,23 @@ class RouteDataService {
 
     async triggerGeocoding() {
         return await this.request(`${this.baseUrl}/geocode`, { method: 'POST' });
+    }
+
+    async deleteSavedOptimization(driverId, date) {
+        try {
+            const url = `${this.baseUrl}/delete-optimization`;
+            const response = await this.request(url, {
+                method: 'DELETE',
+                body: JSON.stringify({
+                    driver_id: driverId,
+                    date: date
+                })
+            });
+            return response.success;
+        } catch (e) {
+            console.error('Error deleting optimization:', e);
+            return false;
+        }
     }
 }
 

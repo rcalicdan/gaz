@@ -14,7 +14,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(
+    name: 'KPO Documents',
+    description: 'KPO (Waste Transfer Declaration) document management endpoints'
+)]
 class KpoDocumentController extends Controller
 {
     public function __construct(
@@ -22,6 +27,55 @@ class KpoDocumentController extends Controller
         protected KpoEmailService $kpoEmailService
     ) {}
 
+    #[OA\Get(
+        path: '/api/kpo-documents/{kpoDocument}',
+        summary: 'Get KPO document details',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'kpoDocument',
+                in: 'path',
+                required: true,
+                description: 'KPO Document ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'KPO document details retrieved successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 1),
+                                new OA\Property(property: 'kpo_number', type: 'string', example: 'KPO-2026-00001'),
+                                new OA\Property(property: 'waste_code', type: 'string', example: '30 01 25'),
+                                new OA\Property(property: 'quantity', type: 'number', format: 'float', example: 150.5),
+                                new OA\Property(property: 'additional_notes', type: 'string', nullable: true),
+                                new OA\Property(property: 'pdf_url', type: 'string', nullable: true),
+                                new OA\Property(property: 'pdf_path', type: 'string', nullable: true),
+                                new OA\Property(property: 'pdf_version', type: 'integer', example: 1),
+                                new OA\Property(property: 'pdf_generated_at', type: 'string', format: 'date-time', nullable: true),
+                                new OA\Property(property: 'pdf_size', type: 'string', example: '256 KB'),
+                                new OA\Property(property: 'pdf_exists', type: 'boolean', example: true),
+                                new OA\Property(property: 'needs_regeneration', type: 'boolean', example: false),
+                                new OA\Property(property: 'is_emailed', type: 'boolean', example: true),
+                                new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
+                                new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(response: 404, description: 'KPO document not found'),
+            new OA\Response(response: 401, description: 'Unauthenticated')
+        ]
+    )]
     public function show(KpoDocument $kpoDocument): JsonResponse
     {
         $kpoDocument->load(['pickup', 'client']);
@@ -58,6 +112,86 @@ class KpoDocumentController extends Controller
         ]);
     }
 
+    #[OA\Get(
+        path: '/api/kpo-documents',
+        summary: 'List KPO documents with filters',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'pickup_id',
+                in: 'query',
+                description: 'Filter by pickup ID',
+                required: false,
+                schema: new OA\Schema(type: 'integer')
+            ),
+            new OA\Parameter(
+                name: 'client_id',
+                in: 'query',
+                description: 'Filter by client ID',
+                required: false,
+                schema: new OA\Schema(type: 'integer')
+            ),
+            new OA\Parameter(
+                name: 'is_emailed',
+                in: 'query',
+                description: 'Filter by email status',
+                required: false,
+                schema: new OA\Schema(type: 'boolean')
+            ),
+            new OA\Parameter(
+                name: 'from_date',
+                in: 'query',
+                description: 'Filter from date (YYYY-MM-DD)',
+                required: false,
+                schema: new OA\Schema(type: 'string', format: 'date')
+            ),
+            new OA\Parameter(
+                name: 'to_date',
+                in: 'query',
+                description: 'Filter to date (YYYY-MM-DD)',
+                required: false,
+                schema: new OA\Schema(type: 'string', format: 'date')
+            ),
+            new OA\Parameter(
+                name: 'search',
+                in: 'query',
+                description: 'Search by KPO number',
+                required: false,
+                schema: new OA\Schema(type: 'string')
+            ),
+            new OA\Parameter(
+                name: 'per_page',
+                in: 'query',
+                description: 'Items per page',
+                required: false,
+                schema: new OA\Schema(type: 'integer', default: 15)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'List of KPO documents',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(type: 'object')),
+                        new OA\Property(
+                            property: 'meta',
+                            properties: [
+                                new OA\Property(property: 'current_page', type: 'integer'),
+                                new OA\Property(property: 'last_page', type: 'integer'),
+                                new OA\Property(property: 'per_page', type: 'integer'),
+                                new OA\Property(property: 'total', type: 'integer'),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated')
+        ]
+    )]
     public function index(Request $request): JsonResponse
     {
         $query = KpoDocument::with(['pickup', 'client']);
@@ -115,6 +249,48 @@ class KpoDocumentController extends Controller
         ]);
     }
 
+    #[OA\Post(
+        path: '/api/kpo-documents/generate-for-pickup/{pickup}',
+        summary: 'Generate KPO PDF for a pickup',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'pickup',
+                in: 'path',
+                required: true,
+                description: 'Pickup ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'PDF generated successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'PDF generated successfully'),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(property: 'kpo_document_id', type: 'integer'),
+                                new OA\Property(property: 'kpo_number', type: 'string'),
+                                new OA\Property(property: 'pdf_url', type: 'string'),
+                                new OA\Property(property: 'pdf_path', type: 'string'),
+                                new OA\Property(property: 'pdf_version', type: 'integer'),
+                                new OA\Property(property: 'path', type: 'string'),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Pickup not found'),
+            new OA\Response(response: 500, description: 'Failed to generate PDF')
+        ]
+    )]
     public function generatePdfForPickup(Pickup $pickup): JsonResponse
     {
         if (!$this->canAccessPickup($pickup)) {
@@ -158,6 +334,27 @@ class KpoDocumentController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/kpo-documents/generate-my-pickup',
+        summary: 'Generate KPO PDF for driver\'s assigned pickup',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['pickup_id'],
+                properties: [
+                    new OA\Property(property: 'pickup_id', type: 'integer', example: 1),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'PDF generated successfully'),
+            new OA\Response(response: 403, description: 'Forbidden - Not a driver or pickup not assigned'),
+            new OA\Response(response: 404, description: 'Pickup not found'),
+            new OA\Response(response: 500, description: 'Failed to generate PDF')
+        ]
+    )]
     public function generatePdfForMyPickup(Request $request): JsonResponse
     {
         $user = auth()->user();
@@ -221,6 +418,26 @@ class KpoDocumentController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/kpo-documents/{kpoDocument}/generate-pdf',
+        summary: 'Generate or regenerate PDF for KPO document',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'kpoDocument',
+                in: 'path',
+                required: true,
+                description: 'KPO Document ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'PDF generated successfully'),
+            new OA\Response(response: 404, description: 'KPO document not found'),
+            new OA\Response(response: 500, description: 'Failed to generate PDF')
+        ]
+    )]
     public function generatePdf(KpoDocument $kpoDocument): JsonResponse
     {
         try {
@@ -250,6 +467,33 @@ class KpoDocumentController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/kpo-documents/{kpoDocument}/download',
+        summary: 'Download KPO PDF document',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'kpoDocument',
+                in: 'path',
+                required: true,
+                description: 'KPO Document ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'PDF file downloaded',
+                content: new OA\MediaType(
+                    mediaType: 'application/pdf',
+                    schema: new OA\Schema(type: 'string', format: 'binary')
+                )
+            ),
+            new OA\Response(response: 404, description: 'PDF file not found'),
+            new OA\Response(response: 500, description: 'Failed to download PDF')
+        ]
+    )]
     public function downloadPdf(KpoDocument $kpoDocument): BinaryFileResponse|JsonResponse
     {
         try {
@@ -277,6 +521,33 @@ class KpoDocumentController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/kpo-documents/{kpoDocument}/preview',
+        summary: 'Preview KPO PDF document in browser',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'kpoDocument',
+                in: 'path',
+                required: true,
+                description: 'KPO Document ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'PDF file preview',
+                content: new OA\MediaType(
+                    mediaType: 'application/pdf',
+                    schema: new OA\Schema(type: 'string', format: 'binary')
+                )
+            ),
+            new OA\Response(response: 404, description: 'PDF file not found'),
+            new OA\Response(response: 500, description: 'Failed to preview PDF')
+        ]
+    )]
     public function previewPdf(KpoDocument $kpoDocument): BinaryFileResponse|JsonResponse
     {
         try {
@@ -304,6 +575,58 @@ class KpoDocumentController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/kpo-documents/{kpoDocument}/email-to-client',
+        summary: 'Email KPO document to registered client',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'kpoDocument',
+                in: 'path',
+                required: true,
+                description: 'KPO Document ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: 'custom_message',
+                        type: 'string',
+                        description: 'Custom message to include in email',
+                        maxLength: 1000,
+                        nullable: true
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Email sent successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string'),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(property: 'kpo_number', type: 'string'),
+                                new OA\Property(property: 'recipient_email', type: 'string'),
+                                new OA\Property(property: 'sent_at', type: 'string', format: 'date-time'),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: 'Client email not found'),
+            new OA\Response(response: 500, description: 'Failed to send email')
+        ]
+    )]
     public function emailToClient(KpoDocument $kpoDocument, Request $request): JsonResponse
     {
         if (!$kpoDocument->client || !$kpoDocument->client->email) {
@@ -340,6 +663,53 @@ class KpoDocumentController extends Controller
         ], 500);
     }
 
+    #[OA\Post(
+        path: '/api/kpo-documents/{kpoDocument}/email-to-custom',
+        summary: 'Email KPO document to custom email address (Admin/Employee only)',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'kpoDocument',
+                in: 'path',
+                required: true,
+                description: 'KPO Document ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['recipient_email', 'authorization_reason'],
+                properties: [
+                    new OA\Property(
+                        property: 'recipient_email',
+                        type: 'string',
+                        format: 'email',
+                        example: 'custom@example.com'
+                    ),
+                    new OA\Property(
+                        property: 'custom_message',
+                        type: 'string',
+                        maxLength: 1000,
+                        nullable: true
+                    ),
+                    new OA\Property(
+                        property: 'authorization_reason',
+                        type: 'string',
+                        description: 'Reason for sending to custom email (GDPR audit)',
+                        maxLength: 500,
+                        example: 'Client requested delivery to alternative email'
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Email sent successfully'),
+            new OA\Response(response: 403, description: 'Unauthorized - Admin/Employee only'),
+            new OA\Response(response: 500, description: 'Failed to send email')
+        ]
+    )]
     public function emailToCustomAddress(KpoDocument $kpoDocument, Request $request): JsonResponse
     {
         $user = auth()->user();
@@ -353,7 +723,7 @@ class KpoDocumentController extends Controller
         $validated = $request->validate([
             'recipient_email' => 'required|email',
             'custom_message' => 'nullable|string|max:1000',
-            'authorization_reason' => 'required|string|max:500' 
+            'authorization_reason' => 'required|string|max:500'
         ]);
 
         $success = $this->kpoEmailService->sendToCustomEmail(
@@ -382,6 +752,48 @@ class KpoDocumentController extends Controller
         ], 500);
     }
 
+    #[OA\Get(
+        path: '/api/kpo-documents/{kpoDocument}/email-history',
+        summary: 'Get email sending history for KPO document (GDPR audit trail)',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'kpoDocument',
+                in: 'path',
+                required: true,
+                description: 'KPO Document ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Email history retrieved',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: 'id', type: 'integer'),
+                                    new OA\Property(property: 'recipient_email', type: 'string'),
+                                    new OA\Property(property: 'status', type: 'object'),
+                                    new OA\Property(property: 'sent_at', type: 'string', format: 'date-time'),
+                                    new OA\Property(property: 'error_message', type: 'string', nullable: true),
+                                    new OA\Property(property: 'sent_by', type: 'object', nullable: true),
+                                ],
+                                type: 'object'
+                            )
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(response: 404, description: 'KPO document not found')
+        ]
+    )]
     public function emailHistory(KpoDocument $kpoDocument): JsonResponse
     {
         $history = $this->kpoEmailService->getEmailHistory($kpoDocument);
@@ -413,6 +825,34 @@ class KpoDocumentController extends Controller
         ]);
     }
 
+    #[OA\Post(
+        path: '/api/kpo-documents/email-logs/{emailLog}/retry',
+        summary: 'Retry failed email sending',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'emailLog',
+                in: 'path',
+                required: true,
+                description: 'Email Log ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'custom_message', type: 'string', maxLength: 1000, nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Email retry sent successfully'),
+            new OA\Response(response: 400, description: 'Email cannot be retried or not a KPO document'),
+            new OA\Response(response: 500, description: 'Failed to retry email')
+        ]
+    )]
     public function retryEmail(EmailLog $emailLog, Request $request): JsonResponse
     {
         if ($emailLog->document_type !== DocumentType::KPO) {
@@ -456,6 +896,52 @@ class KpoDocumentController extends Controller
         ], 500);
     }
 
+    #[OA\Get(
+        path: '/api/kpo-documents/{kpoDocument}/email-statistics',
+        summary: 'Get email statistics for KPO document',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'kpoDocument',
+                in: 'path',
+                required: true,
+                description: 'KPO Document ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Email statistics retrieved',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(property: 'kpo_number', type: 'string'),
+                                new OA\Property(
+                                    property: 'statistics',
+                                    properties: [
+                                        new OA\Property(property: 'total_sent', type: 'integer'),
+                                        new OA\Property(property: 'successful', type: 'integer'),
+                                        new OA\Property(property: 'failed', type: 'integer'),
+                                        new OA\Property(property: 'bounced', type: 'integer'),
+                                        new OA\Property(property: 'last_sent_at', type: 'string', format: 'date-time', nullable: true),
+                                        new OA\Property(property: 'unique_recipients', type: 'integer'),
+                                    ],
+                                    type: 'object'
+                                ),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(response: 404, description: 'KPO document not found')
+        ]
+    )]
     public function emailStatistics(KpoDocument $kpoDocument): JsonResponse
     {
         $statistics = $this->kpoEmailService->getEmailStatistics($kpoDocument);
@@ -469,6 +955,26 @@ class KpoDocumentController extends Controller
         ]);
     }
 
+    #[OA\Get(
+        path: '/api/kpo-documents/pickup/{pickup}/download',
+        summary: 'Download KPO PDF by pickup',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'pickup',
+                in: 'path',
+                required: true,
+                description: 'Pickup ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'PDF downloaded'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'KPO document not found for this pickup')
+        ]
+    )]
     public function downloadPdfByPickup(Pickup $pickup): BinaryFileResponse|JsonResponse
     {
         if (!$this->canAccessPickup($pickup)) {
@@ -490,6 +996,26 @@ class KpoDocumentController extends Controller
         return $this->downloadPdf($kpoDocument);
     }
 
+    #[OA\Get(
+        path: '/api/kpo-documents/pickup/{pickup}/preview',
+        summary: 'Preview KPO PDF by pickup',
+        security: [['bearerAuth' => []]],
+        tags: ['KPO Documents'],
+        parameters: [
+            new OA\Parameter(
+                name: 'pickup',
+                in: 'path',
+                required: true,
+                description: 'Pickup ID',
+                schema: new OA\Schema(type: 'integer')
+            )
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'PDF preview'),
+            new OA\Response(response: 403, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'KPO document not found for this pickup')
+        ]
+    )]
     public function previewPdfByPickup(Pickup $pickup): BinaryFileResponse|JsonResponse
     {
         if (!$this->canAccessPickup($pickup)) {

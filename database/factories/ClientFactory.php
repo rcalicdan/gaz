@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\ClientPhoneNumber;
 use App\Models\PriceList;
 use App\Models\WasteType;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -14,29 +15,29 @@ class ClientFactory extends Factory
     public function definition(): array
     {
         $locations = [
-            ['city' => 'Warszawa', 'province' => 'Mazowieckie', 'lat' => 52.2302, 'lng' => 21.0032], 
+            ['city' => 'Warszawa', 'province' => 'Mazowieckie', 'lat' => 52.2302, 'lng' => 21.0032],
             ['city' => 'Warszawa', 'province' => 'Mazowieckie', 'lat' => 52.2497, 'lng' => 21.0122],
-            ['city' => 'Kraków', 'province' => 'Małopolskie', 'lat' => 50.0681, 'lng' => 19.9479], 
+            ['city' => 'Kraków', 'province' => 'Małopolskie', 'lat' => 50.0681, 'lng' => 19.9479],
             ['city' => 'Gdańsk', 'province' => 'Pomorskie', 'lat' => 54.3478, 'lng' => 18.6496],
             ['city' => 'Wrocław', 'province' => 'Dolnośląskie', 'lat' => 51.0964, 'lng' => 17.0374],
             ['city' => 'Poznań', 'province' => 'Wielkopolskie', 'lat' => 52.4006, 'lng' => 16.9272],
         ];
 
         $location = fake()->randomElement($locations);
-        $plFaker = fake('pl_PL'); 
+        $plFaker = fake('pl_PL');
 
         return [
-            'company_name' => $plFaker->company(),
-            'vat_id' => $plFaker->numerify('PL##########'), 
-            'street_name' => $plFaker->streetName(),
-            'street_number' => $plFaker->buildingNumber(),
+            'company_name' => fake()->company(),
+            'vat_id' => fake()->numerify('PL##########'),
+            'street_name' => fake()->streetName(),
+            'street_number' => fake()->buildingNumber(),
             'city' => $location['city'],
-            'zip_code' => $plFaker->postcode(), 
+            'zip_code' => $plFaker->postcode(),
             'province' => $location['province'],
-            
+
             'latitude' => $location['lat'] + fake()->randomFloat(6, -0.002, 0.002),
             'longitude' => $location['lng'] + fake()->randomFloat(6, -0.002, 0.002),
-            
+
             'contact_person' => $plFaker->name(),
             'email' => fake()->unique()->companyEmail(),
             'brand_category' => fake()->optional()->randomElement(['Restaurant', 'Retail', 'Office', 'Manufacturing']),
@@ -57,7 +58,7 @@ class ClientFactory extends Factory
     public function withCoordinates(): static
     {
         return $this->state(fn (array $attributes) => [
-            'latitude' => fake()->latitude(49.0, 54.8), 
+            'latitude' => fake()->latitude(49.0, 54.8),
             'longitude' => fake()->longitude(14.1, 24.1),
         ]);
     }
@@ -68,5 +69,27 @@ class ClientFactory extends Factory
             'latitude' => null,
             'longitude' => null,
         ]);
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Client $client) {
+            // Stwórz podstawowy numer telefonu
+            ClientPhoneNumber::factory()
+                ->primary()
+                ->create([
+                    'client_id' => $client->id,
+                    'label' => 'Główny',
+                ]);
+
+            // Opcjonalnie dodaj drugi numer (30% szans)
+            if (fake()->boolean(30)) {
+                ClientPhoneNumber::factory()
+                    ->create([
+                        'client_id' => $client->id,
+                        'label' => fake()->randomElement(['Biuro', 'Komórka']),
+                    ]);
+            }
+        });
     }
 }

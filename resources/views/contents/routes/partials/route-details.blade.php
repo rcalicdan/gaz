@@ -4,7 +4,7 @@
             <i class="fas fa-stream text-emerald-600 mr-2"></i>
             Szczegóły Przejazdu
         </h2>
-        
+
         <button @click="window.print()" class="text-gray-500 hover:text-gray-700">
             <i class="fas fa-print"></i>
         </button>
@@ -20,20 +20,31 @@
             </div>
             <div class="pt-1">
                 <h4 class="font-bold text-gray-900">Baza (Start)</h4>
-                <p class="text-sm text-gray-500">Warszawa, Centrum Logistyczne</p>
-                <div class="mt-1 text-xs font-mono text-gray-400">08:00</div>
+                <p class="text-sm text-gray-500">Centrum Logistyczne</p>
             </div>
         </div>
         <div class="route-timeline">
             <template x-for="(step, index) in optimizationResult?.route_steps" :key="index">
-                <div class="flex items-start p-4 border-b border-gray-100 hover:bg-emerald-50/30 transition-colors">
-                    <div class="flex flex-col items-center mr-4">
+                <div class="flex items-center p-4 border-b border-gray-100 hover:bg-emerald-50/30 transition-colors relative"
+                    :class="{ 'cursor-grab active:cursor-grabbing opacity-75 bg-emerald-50': manualEditMode }"
+                    :draggable="manualEditMode"
+                    @dragstart="onDragStart(index, $event)"
+                    @dragover="onDragOver($event)"
+                    @drop="onDrop(index, $event)"
+                    @dragend="$event.target.classList.remove('opacity-50')">
+
+                    <!-- Drag Handle When in Edit Mode -->
+                    <div x-show="manualEditMode" class="absolute left-2 top-1/2 transform -translate-y-1/2 text-emerald-600 opacity-60 mr-2">
+                        <i class="fas fa-grip-vertical"></i>
+                    </div>
+
+                    <div class="flex flex-col items-center mr-4" :style="manualEditMode ? 'margin-left: 20px;' : ''">
                         <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 border-2 border-emerald-500 flex items-center justify-center text-sm font-bold z-10"
                              x-text="index + 1">
                         </div>
                         <div class="w-0.5 h-full bg-gray-300 my-1" x-show="index !== optimizationResult.route_steps.length - 1"></div>
                     </div>
-                    
+
                     <div class="flex-1">
                         <div class="flex justify-between items-start">
                             <div>
@@ -45,7 +56,7 @@
                                 <div class="text-xs text-gray-500 mt-1" x-text="step.distance"></div>
                             </div>
                         </div>
-                        
+
                         <div class="mt-2 flex items-center gap-3 text-xs text-gray-500">
                              <span class="bg-gray-100 px-2 py-0.5 rounded">
                                 <i class="fas fa-trash mr-1"></i> Odbiór odpadów
@@ -65,7 +76,7 @@
             <div class="pt-1">
                 <h4 class="font-bold text-gray-900">Baza (Powrót)</h4>
                 <div class="mt-1 text-xs font-mono text-gray-400">
-                    Szacowany powrót: <span x-text="executiveSummary?.returnTime"></span>
+
                 </div>
             </div>
         </div>

@@ -1,11 +1,11 @@
-<div x-show="optimizationResult && showRouteSummary" 
-     x-transition 
+<div x-show="optimizationResult && showRouteSummary"
+     x-transition
      class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-    
+
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-gray-800 flex items-center">
             <i class="fas fa-chart-pie text-emerald-600 mr-2"></i>
-            Podsumowanie Trasy
+            Podsumowanie Optymalnej Trasy
         </h2>
         <div class="text-sm text-gray-500">
             Dla: <span class="font-semibold text-gray-800" x-text="selectedDriver?.full_name"></span>

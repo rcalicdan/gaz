@@ -1,7 +1,7 @@
 class RouteOptimizerService {
     constructor(component) {
         this.component = component;
-        this.depotCoords = [21.0122, 52.2297];
+        this.depotCoords = [21.1476, 50.8665];
         this.idMapping = new Map();
     }
 
@@ -36,15 +36,18 @@ class RouteOptimizerService {
 
     buildPayload() {
         const driverId = this.component.selectedDriver.id;
-        
+
         const jobs = this.component.orders
-            .filter(o => o.has_coordinates || o.isCustom)
+            .filter(o => o.has_coordinates || o.isCustom || o.manuallyEdited)
             .map((o, index) => {
                 let coords;
-                if (o.isCustom && Array.isArray(o.coordinates)) {
-                    coords = [parseFloat(o.coordinates[1]), parseFloat(o.coordinates[0])];
-                } else if (o.vroom_coordinates && Array.isArray(o.vroom_coordinates)) {
+
+                if (o.vroom_coordinates && Array.isArray(o.vroom_coordinates)) {
                     coords = o.vroom_coordinates.map(c => parseFloat(c));
+                } else if (o.isCustom && Array.isArray(o.coordinates)) {
+                    coords = [parseFloat(o.coordinates[1]), parseFloat(o.coordinates[0])];
+                } else if (o.manuallyEdited && Array.isArray(o.coordinates)) {
+                    coords = [parseFloat(o.coordinates[1]), parseFloat(o.coordinates[0])];
                 } else if (Array.isArray(o.coordinates) && o.coordinates.length === 2) {
                     coords = [parseFloat(o.coordinates[1]), parseFloat(o.coordinates[0])];
                 } else {
@@ -53,7 +56,7 @@ class RouteOptimizerService {
                 }
 
                 const vroomId = typeof o.id === 'string' ? this.stringToId(o.id) : o.id;
-                
+
                 this.idMapping.set(vroomId, String(o.id));
 
                 return {
@@ -83,7 +86,7 @@ class RouteOptimizerService {
             options: { g: true }
         };
     }
-    
+
     stringToId(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -109,7 +112,7 @@ class RouteOptimizerService {
         }
 
         const route = vroomResponse.routes[0];
-        
+
         const steps = route.steps
             .filter(step => step.type === 'job')
             .map(step => {
@@ -122,7 +125,7 @@ class RouteOptimizerService {
                 }
 
                 return {
-                    job: originalId, 
+                    job: originalId,
                     client_name: originalOrder.client_name,
                     location: originalOrder.address,
                     coordinates: originalOrder.coordinates,
@@ -145,7 +148,7 @@ class RouteOptimizerService {
     }
 
     secondsToTime(seconds) {
-        const startOfDay = 28800; 
+        const startOfDay = 28800;
         const totalSeconds = startOfDay + seconds;
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
