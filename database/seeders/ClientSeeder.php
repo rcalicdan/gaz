@@ -32,13 +32,28 @@ class ClientSeeder extends Seeder
         foreach ($hubs as $hub) {
             $clients = Client::factory()
                 ->count(5)
-                ->state(function (array $attributes) use ($hub) {
-                    return [
-                        'city' => $hub['city'],
-                        'province' => $hub['province'],
-                        'latitude' => $hub['lat'] + fake()->randomFloat(5, -0.04, 0.04),
-                        'longitude' => $hub['lng'] + fake()->randomFloat(5, -0.06, 0.06),
+                ->state(function (array $attributes) use ($hub, $fakerPl) {
+                    $hasDifferentPremises = fake()->boolean(70);
+                    
+                    $state = [
+                        'registered_city' => $hub['city'],
+                        'registered_province' => $hub['province'],
                     ];
+                    
+                    if ($hasDifferentPremises) {
+                        $state['premises_street_name'] = fake()->streetName();
+                        $state['premises_street_number'] = fake()->buildingNumber();
+                        $state['premises_city'] = $hub['city'];
+                        $state['premises_zip_code'] = $fakerPl->postcode();
+                        $state['premises_province'] = $hub['province'];
+                        $state['premises_latitude'] = $hub['lat'] + fake()->randomFloat(5, -0.04, 0.04);
+                        $state['premises_longitude'] = $hub['lng'] + fake()->randomFloat(5, -0.06, 0.06);
+                    } else {
+                        $state['premises_latitude'] = $hub['lat'] + fake()->randomFloat(5, -0.04, 0.04);
+                        $state['premises_longitude'] = $hub['lng'] + fake()->randomFloat(5, -0.06, 0.06);
+                    }
+                    
+                    return $state;
                 })
                 ->create([
                     'price_list_id' => $priceList->id,
@@ -59,6 +74,7 @@ class ClientSeeder extends Seeder
         $this->addPhoneNumbersToClients($unlocatedClients, $fakerPl);
             
         $this->command->info('Clients and phone numbers seeded successfully across ' . count($hubs) . ' Polish cities.');
+        $this->command->info('Mix of clients with separate premises addresses and those using registered address.');
     }
 
     private function addPhoneNumbersToClients($clients, $faker)

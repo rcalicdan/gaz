@@ -25,18 +25,18 @@ class ClientFactory extends Factory
 
         $location = fake()->randomElement($locations);
         $plFaker = fake('pl_PL');
+        
+        $hasDifferentPremises = fake()->boolean(60);
 
-        return [
+        $data = [
             'company_name' => fake()->company(),
             'vat_id' => fake()->numerify('PL##########'),
-            'street_name' => fake()->streetName(),
-            'street_number' => fake()->buildingNumber(),
-            'city' => $location['city'],
-            'zip_code' => $plFaker->postcode(),
-            'province' => $location['province'],
-
-            'latitude' => $location['lat'] + fake()->randomFloat(6, -0.002, 0.002),
-            'longitude' => $location['lng'] + fake()->randomFloat(6, -0.002, 0.002),
+            
+            'registered_street_name' => fake()->streetName(),
+            'registered_street_number' => fake()->buildingNumber(),
+            'registered_city' => $location['city'],
+            'registered_zip_code' => $plFaker->postcode(),
+            'registered_province' => $location['province'],
 
             'contact_person' => $plFaker->name(),
             'email' => fake()->unique()->companyEmail(),
@@ -53,28 +53,70 @@ class ClientFactory extends Factory
             'last_pickup_date' => fake()->optional()->dateTimeBetween('-1 month', 'now'),
             'pickup_frequency' => fake()->randomElement(\App\Enums\PickupFrequency::cases()),
         ];
+
+        if ($hasDifferentPremises) {
+            $premisesLocation = fake()->randomElement($locations);
+            $data['premises_street_name'] = fake()->streetName();
+            $data['premises_street_number'] = fake()->buildingNumber();
+            $data['premises_city'] = $premisesLocation['city'];
+            $data['premises_zip_code'] = $plFaker->postcode();
+            $data['premises_province'] = $premisesLocation['province'];
+            $data['premises_latitude'] = $premisesLocation['lat'] + fake()->randomFloat(6, -0.002, 0.002);
+            $data['premises_longitude'] = $premisesLocation['lng'] + fake()->randomFloat(6, -0.002, 0.002);
+        } else {
+            $data['premises_street_name'] = null;
+            $data['premises_street_number'] = null;
+            $data['premises_city'] = null;
+            $data['premises_zip_code'] = null;
+            $data['premises_province'] = null;
+            $data['premises_latitude'] = $location['lat'] + fake()->randomFloat(6, -0.002, 0.002);
+            $data['premises_longitude'] = $location['lng'] + fake()->randomFloat(6, -0.002, 0.002);
+        }
+
+        return $data;
     }
 
     public function withCoordinates(): static
     {
         return $this->state(fn (array $attributes) => [
-            'latitude' => fake()->latitude(49.0, 54.8),
-            'longitude' => fake()->longitude(14.1, 24.1),
+            'premises_latitude' => fake()->latitude(49.0, 54.8),
+            'premises_longitude' => fake()->longitude(14.1, 24.1),
         ]);
     }
 
     public function withoutCoordinates(): static
     {
         return $this->state(fn (array $attributes) => [
-            'latitude' => null,
-            'longitude' => null,
+            'premises_latitude' => null,
+            'premises_longitude' => null,
+        ]);
+    }
+    
+    public function withSeparatePremises(): static
+    {
+        $locations = [
+            ['city' => 'Warszawa', 'province' => 'Mazowieckie', 'lat' => 52.2302, 'lng' => 21.0032],
+            ['city' => 'Kraków', 'province' => 'Małopolskie', 'lat' => 50.0681, 'lng' => 19.9479],
+            ['city' => 'Gdańsk', 'province' => 'Pomorskie', 'lat' => 54.3478, 'lng' => 18.6496],
+        ];
+        
+        $location = fake()->randomElement($locations);
+        $plFaker = fake('pl_PL');
+        
+        return $this->state(fn (array $attributes) => [
+            'premises_street_name' => fake()->streetName(),
+            'premises_street_number' => fake()->buildingNumber(),
+            'premises_city' => $location['city'],
+            'premises_zip_code' => $plFaker->postcode(),
+            'premises_province' => $location['province'],
+            'premises_latitude' => $location['lat'] + fake()->randomFloat(6, -0.002, 0.002),
+            'premises_longitude' => $location['lng'] + fake()->randomFloat(6, -0.002, 0.002),
         ]);
     }
 
     public function configure(): static
     {
         return $this->afterCreating(function (Client $client) {
-            // Stwórz podstawowy numer telefonu
             ClientPhoneNumber::factory()
                 ->primary()
                 ->create([
@@ -82,7 +124,6 @@ class ClientFactory extends Factory
                     'label' => 'Główny',
                 ]);
 
-            // Opcjonalnie dodaj drugi numer (30% szans)
             if (fake()->boolean(30)) {
                 ClientPhoneNumber::factory()
                     ->create([

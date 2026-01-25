@@ -31,7 +31,7 @@ class Table extends Component
             ->headers([
                 ['key' => 'id', 'label' => __('ID'), 'sortable' => true],
                 ['key' => 'company_name', 'label' => __('Company Name'), 'sortable' => true],
-                ['key' => 'city', 'label' => __('City'), 'sortable' => true],
+                ['key' => 'premises_city', 'label' => __('City'), 'sortable' => true],
                 ['key' => 'email', 'label' => __('Email'), 'sortable' => true],
                 ['key' => 'phone_number', 'label' => __('Phone'), 'sortable' => true],
                 ['key' => 'created_at', 'label' => __('Created'), 'sortable' => true, 'type' => 'datetime'],
@@ -55,11 +55,23 @@ class Table extends Component
         $query = Client::query()->with('defaultWasteType');
 
         if ($this->filterProvince) {
-            $query->where('province', $this->filterProvince);
+            $query->where(function($q) {
+                $q->where('premises_province', $this->filterProvince)
+                  ->orWhere(function($subQ) {
+                      $subQ->whereNull('premises_province')
+                           ->where('registered_province', $this->filterProvince);
+                  });
+            });
         }
 
         if ($this->filterCity) {
-            $query->where('city', $this->filterCity);
+            $query->where(function($q) {
+                $q->where('premises_city', $this->filterCity)
+                  ->orWhere(function($subQ) {
+                      $subQ->whereNull('premises_city')
+                           ->where('registered_city', $this->filterCity);
+                  });
+            });
         }
 
         if ($this->filterBrandCategory) {
@@ -71,11 +83,18 @@ class Table extends Component
         return $this->applySearchAndSort($query, [
             'company_name', 
             'vat_id', 
-            'city', 
             'email', 
             'phone_number',
-            'street_name',
-            'zip_code'
+            'registered_street_name',
+            'registered_street_number',
+            'registered_city',
+            'registered_zip_code',
+            'registered_province',
+            'premises_street_name',
+            'premises_street_number',
+            'premises_city',
+            'premises_zip_code',
+            'premises_province',
         ], $dataTable);
     }
 
@@ -87,7 +106,7 @@ class Table extends Component
     public function getProvincesProperty()
     {
         return Client::query()
-            ->select('province')
+            ->selectRaw('COALESCE(premises_province, registered_province) as province')
             ->whereNotNull('province')
             ->where('province', '!=', '')
             ->distinct()
@@ -98,12 +117,18 @@ class Table extends Component
     public function getCitiesProperty()
     {
         $query = Client::query()
-            ->select('city')
+            ->selectRaw('COALESCE(premises_city, registered_city) as city')
             ->whereNotNull('city')
             ->where('city', '!=', '');
 
         if ($this->filterProvince) {
-            $query->where('province', $this->filterProvince);
+            $query->where(function($q) {
+                $q->where('premises_province', $this->filterProvince)
+                  ->orWhere(function($subQ) {
+                      $subQ->whereNull('premises_province')
+                           ->where('registered_province', $this->filterProvince);
+                  });
+            });
         }
 
         return $query->distinct()
