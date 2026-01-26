@@ -32,6 +32,8 @@ class CreatePage extends Component
     public $auto_kpo = false;
     public $pickup_frequency = null;
     public $phoneNumbers = [];
+    public $contract_number = '';
+    public $contract_signed_date = '';
 
     protected ClientService $clientService;
 
@@ -56,8 +58,8 @@ class CreatePage extends Component
     {
         if (count($this->phoneNumbers) > 1) {
             unset($this->phoneNumbers[$index]);
-            $this->phoneNumbers = array_values($this->phoneNumbers); 
-            
+            $this->phoneNumbers = array_values($this->phoneNumbers);
+
             if (!collect($this->phoneNumbers)->contains('is_primary', true) && count($this->phoneNumbers) > 0) {
                 $this->phoneNumbers[0]['is_primary'] = true;
             }
@@ -89,6 +91,8 @@ class CreatePage extends Component
         $rules = [
             'company_name' => 'required|string|max:255',
             'vat_id' => 'nullable|string|max:50|unique:clients,vat_id',
+            'contract_number' => 'nullable|string|max:255|unique:clients,contract_number',
+            'contract_signed_date' => 'nullable|date',
             'registered_street_name' => 'required|string|max:255',
             'registered_street_number' => 'nullable|string|max:50',
             'registered_city' => 'required|string|max:255',
@@ -136,6 +140,8 @@ class CreatePage extends Component
             'premises_province' => 'premises province',
             'email' => 'email',
             'contact_person' => 'contact person',
+            'contract_number' => 'contract number',
+            'contract_signed_date' => 'contract signed date',
             'brand_category' => 'brand category',
             'default_waste_type_id' => 'default waste type',
             'price_rate' => 'price rate',
@@ -161,6 +167,8 @@ class CreatePage extends Component
         $data = [
             'company_name' => $this->company_name,
             'vat_id' => $this->vat_id,
+            'contract_number' => $this->contract_number,
+            'contract_signed_date' => $this->contract_signed_date,
             'registered_street_name' => $this->registered_street_name,
             'registered_street_number' => $this->registered_street_number,
             'registered_city' => $this->registered_city,

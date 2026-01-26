@@ -34,6 +34,8 @@ class UpdatePage extends Component
     public $auto_kpo = false;
     public $pickup_frequency = null;
     public $phoneNumbers = [];
+    public $contract_number = '';
+    public $contract_signed_date = '';
 
     protected ClientService $clientService;
 
@@ -47,22 +49,19 @@ class UpdatePage extends Component
         $this->client = $client;
         $this->company_name = $client->company_name;
         $this->vat_id = $client->vat_id;
-        
+        $this->contract_number = $client->contract_number;
+        $this->contract_signed_date = $client->contract_signed_date?->format('Y-m-d');
         $this->registered_street_name = $client->registered_street_name;
         $this->registered_street_number = $client->registered_street_number;
         $this->registered_city = $client->registered_city;
         $this->registered_zip_code = $client->registered_zip_code;
         $this->registered_province = $client->registered_province;
-        
-        // Check if client has separate premises
         $this->has_separate_premises = !empty($client->premises_street_name);
-        
         $this->premises_street_name = $client->premises_street_name;
         $this->premises_street_number = $client->premises_street_number;
         $this->premises_city = $client->premises_city;
         $this->premises_zip_code = $client->premises_zip_code;
         $this->premises_province = $client->premises_province;
-        
         $this->email = $client->email;
         $this->contact_person = $client->contact_person;
         $this->brand_category = $client->brand_category;
@@ -98,8 +97,8 @@ class UpdatePage extends Component
     {
         if (count($this->phoneNumbers) > 1) {
             unset($this->phoneNumbers[$index]);
-            $this->phoneNumbers = array_values($this->phoneNumbers); 
-            
+            $this->phoneNumbers = array_values($this->phoneNumbers);
+
             if (!collect($this->phoneNumbers)->contains('is_primary', true) && count($this->phoneNumbers) > 0) {
                 $this->phoneNumbers[0]['is_primary'] = true;
             }
@@ -111,7 +110,7 @@ class UpdatePage extends Component
         foreach ($this->phoneNumbers as $key => $phone) {
             $this->phoneNumbers[$key]['is_primary'] = false;
         }
-     
+
         $this->phoneNumbers[$index]['is_primary'] = true;
     }
 
@@ -131,6 +130,8 @@ class UpdatePage extends Component
         $rules = [
             'company_name' => 'required|string|max:255',
             'vat_id' => ['nullable', 'string', 'max:50', Rule::unique('clients')->ignore($this->client->id)],
+            'contract_number' => ['nullable', 'string', 'max:255', Rule::unique('clients')->ignore($this->client->id)],
+            'contract_signed_date' => 'nullable|date',
             'registered_street_name' => 'required|string|max:255',
             'registered_street_number' => 'nullable|string|max:50',
             'registered_city' => 'required|string|max:255',
@@ -178,6 +179,8 @@ class UpdatePage extends Component
             'premises_province' => 'premises province',
             'email' => 'email',
             'contact_person' => 'contact person',
+            'contract_number' => 'contract number',
+            'contract_signed_date' => 'contract signed date',
             'brand_category' => 'brand category',
             'default_waste_type_id' => 'default waste type',
             'price_rate' => 'price rate',
@@ -203,6 +206,8 @@ class UpdatePage extends Component
         $data = [
             'company_name' => $this->company_name,
             'vat_id' => $this->vat_id,
+            'contract_number' => $this->contract_number,
+            'contract_signed_date' => $this->contract_signed_date,
             'registered_street_name' => $this->registered_street_name,
             'registered_street_number' => $this->registered_street_number,
             'registered_city' => $this->registered_city,

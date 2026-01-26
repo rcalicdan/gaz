@@ -9,16 +9,27 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <x-forms.field label="{{ __('Company Name') }}" name="company_name" required>
                         <x-forms.input name="company_name" wire:model="company_name"
-                            placeholder="{{ __('Enter company name') }}" required />
+                            placeholder="{{ __('Enter company name') }}" required :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\'></path>'" />
                     </x-forms.field>
 
                     <x-forms.field label="{{ __('VAT ID') }}" name="vat_id">
-                        <x-forms.input name="vat_id" wire:model="vat_id" placeholder="{{ __('Enter VAT ID') }}" />
+                        <x-forms.input name="vat_id" wire:model="vat_id" placeholder="{{ __('Enter VAT ID') }}"
+                            :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\'></path>'" />
+                    </x-forms.field>
+
+                    <x-forms.field label="{{ __('Contract Number') }}" name="contract_number">
+                        <x-forms.input name="contract_number" wire:model="contract_number"
+                            placeholder="{{ __('Enter contract number') }}" :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\'></path>'" />
+                    </x-forms.field>
+
+                    <x-forms.field label="{{ __('Contract Signed Date') }}" name="contract_signed_date">
+                        <x-forms.input type="date" name="contract_signed_date" wire:model="contract_signed_date"
+                            :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z\'></path>'" />
                     </x-forms.field>
 
                     <x-forms.field label="{{ __('Brand Category') }}" name="brand_category">
                         <x-forms.input name="brand_category" wire:model="brand_category"
-                            placeholder="{{ __('Enter brand category') }}" />
+                            placeholder="{{ __('Enter brand category') }}" :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z\'></path>'" />
                     </x-forms.field>
 
                     <x-forms.field label="{{ __('Default Waste Type') }}" name="default_waste_type_id">
@@ -28,12 +39,12 @@
                 </div>
             </div>
 
-            {{-- Registered Address Section --}}
             <div class="space-y-6">
                 <div class="flex items-center gap-2">
                     <div class="p-2 bg-blue-50 rounded-lg">
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900">
@@ -43,7 +54,8 @@
                 <p class="text-sm text-gray-600 -mt-2 ml-14">{{ __('Official business registration address') }}</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <x-forms.field class="md:col-span-2" label="{{ __('Street Name') }}" name="registered_street_name" required>
+                    <x-forms.field class="md:col-span-2" label="{{ __('Street Name') }}" name="registered_street_name"
+                        required>
                         <x-forms.input name="registered_street_name" wire:model="registered_street_name"
                             placeholder="{{ __('Enter street name') }}" required />
                     </x-forms.field>
@@ -54,13 +66,13 @@
                     </x-forms.field>
 
                     <x-forms.field label="{{ __('City') }}" name="registered_city" required>
-                        <x-forms.input name="registered_city" wire:model="registered_city" placeholder="{{ __('Enter city') }}"
-                            required />
+                        <x-forms.input name="registered_city" wire:model="registered_city"
+                            placeholder="{{ __('Enter city') }}" required />
                     </x-forms.field>
 
                     <x-forms.field label="{{ __('Zip Code') }}" name="registered_zip_code" required>
-                        <x-forms.input name="registered_zip_code" wire:model="registered_zip_code" placeholder="{{ __('Enter zip code') }}"
-                            required />
+                        <x-forms.input name="registered_zip_code" wire:model="registered_zip_code"
+                            placeholder="{{ __('Enter zip code') }}" required />
                     </x-forms.field>
 
                     <x-forms.field label="{{ __('Province') }}" name="registered_province">
@@ -70,20 +82,21 @@
                 </div>
             </div>
 
-            {{-- Premises Address Section --}}
             <div class="space-y-6">
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-2">
                         <div class="p-2 bg-amber-50 rounded-lg">
-                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
                         <h3 class="text-lg font-semibold text-gray-900">
                             {{ __('Premises Address') }}
                         </h3>
                     </div>
-                    
+
                     <x-forms.field name="has_separate_premises">
                         <x-forms.checkbox name="has_separate_premises" wire:model.live="has_separate_premises"
                             label="{{ __('Different from registered address') }}"
@@ -91,20 +104,23 @@
                     </x-forms.field>
                 </div>
 
-                @if(!$has_separate_premises)
+                @if (!$has_separate_premises)
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
                         <div class="flex items-center gap-2 text-sm text-gray-600">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span>{{ __('Pickup location will use the registered address shown above.') }}</span>
                         </div>
                     </div>
                 @else
-                    <p class="text-sm text-gray-600 -mt-2 ml-14">{{ __('Physical location for waste pickup (will be geocoded for route optimization)') }}</p>
+                    <p class="text-sm text-gray-600 -mt-2 ml-14">
+                        {{ __('Physical location for waste pickup (will be geocoded for route optimization)') }}</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <x-forms.field class="md:col-span-2" label="{{ __('Street Name') }}" name="premises_street_name" required>
+                        <x-forms.field class="md:col-span-2" label="{{ __('Street Name') }}"
+                            name="premises_street_name" required>
                             <x-forms.input name="premises_street_name" wire:model="premises_street_name"
                                 placeholder="{{ __('Enter street name') }}" required />
                         </x-forms.field>
@@ -115,13 +131,13 @@
                         </x-forms.field>
 
                         <x-forms.field label="{{ __('City') }}" name="premises_city" required>
-                            <x-forms.input name="premises_city" wire:model="premises_city" placeholder="{{ __('Enter city') }}"
-                                required />
+                            <x-forms.input name="premises_city" wire:model="premises_city"
+                                placeholder="{{ __('Enter city') }}" required />
                         </x-forms.field>
 
                         <x-forms.field label="{{ __('Zip Code') }}" name="premises_zip_code" required>
-                            <x-forms.input name="premises_zip_code" wire:model="premises_zip_code" placeholder="{{ __('Enter zip code') }}"
-                                required />
+                            <x-forms.input name="premises_zip_code" wire:model="premises_zip_code"
+                                placeholder="{{ __('Enter zip code') }}" required />
                         </x-forms.field>
 
                         <x-forms.field label="{{ __('Province') }}" name="premises_province">
@@ -202,14 +218,12 @@
                                     </button>
 
                                     @if (count($phoneNumbers) > 1)
-                                        <button type="button"
-                                            wire:click="removePhoneNumber({{ $index }})"
+                                        <button type="button" wire:click="removePhoneNumber({{ $index }})"
                                             class="p-2 text-red-600 bg-white hover:bg-red-50 rounded-md transition-colors"
                                             title="{{ __('Remove') }}">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    stroke-width="2"
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                                 </path>
                                             </svg>
