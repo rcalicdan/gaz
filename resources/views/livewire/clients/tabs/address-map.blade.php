@@ -1,26 +1,72 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" wire:key="tab-address">
     <div class="space-y-6">
         <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 overflow-hidden group">
+            <div class="px-6 py-5 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white">
+                <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-2">
+                    <div class="p-1.5 bg-white ring-1 ring-blue-100 rounded-md shadow-sm text-blue-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                    {{ __('Registered Address') }}
+                </h3>
+            </div>
+
+            <div class="p-6">
+                <div class="relative pl-4 border-l-2 border-blue-400 space-y-1">
+                    <p class="text-sm font-semibold text-gray-900">
+                        {{ $client->registered_street_name }} {{ $client->registered_street_number }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        {{ $client->registered_zip_code }} {{ $client->registered_city }}
+                    </p>
+                    <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                        {{ $client->registered_province }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 overflow-hidden group">
             <div class="px-6 py-5 border-b border-amber-100 bg-gradient-to-r from-amber-50 to-white">
                 <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-2">
                     <div class="p-1.5 bg-white ring-1 ring-amber-100 rounded-md shadow-sm text-amber-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
-                    {{ __('Location Details') }}
+                    {{ __('Premises Address') }}
+                    @if($client->premises_street_name)
+                        <span class="ml-auto inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                            {{ __('Pickup Location') }}
+                        </span>
+                    @else
+                        <span class="ml-auto inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                            {{ __('Same as Registered') }}
+                        </span>
+                    @endif
                 </h3>
             </div>
 
             <div class="p-6 relative">
-                <div class="relative pl-4 border-l-2 border-amber-400 space-y-1">
-                    <p class="text-lg font-bold text-gray-900">
-                        {{ $client->street_name }} {{ $client->street_number }}
-                    </p>
-                    <p class="text-base text-gray-600">
-                        {{ $client->zip_code }} {{ $client->city }}
-                    </p>
-                    <p class="text-sm font-semibold text-amber-600 uppercase tracking-wide">
-                        {{ $client->province }}, {{ __('Poland') }}
-                    </p>
+                <div class="relative pl-4 border-l-2 border-amber-400 space-y-1 mb-6">
+                    @if($client->premises_street_name)
+                        <p class="text-lg font-bold text-gray-900">
+                            {{ $client->premises_street_name }} {{ $client->premises_street_number }}
+                        </p>
+                        <p class="text-base text-gray-600">
+                            {{ $client->premises_zip_code }} {{ $client->premises_city }}
+                        </p>
+                        <p class="text-sm font-semibold text-amber-600 uppercase tracking-wide">
+                            {{ $client->premises_province }}
+                        </p>
+                    @else
+                        <p class="text-lg font-bold text-gray-900">
+                            {{ $client->registered_street_name }} {{ $client->registered_street_number }}
+                        </p>
+                        <p class="text-base text-gray-600">
+                            {{ $client->registered_zip_code }} {{ $client->registered_city }}
+                        </p>
+                        <p class="text-sm font-semibold text-amber-600 uppercase tracking-wide">
+                            {{ $client->registered_province }}
+                        </p>
+                    @endif
                 </div>
 
                 <hr class="my-6 border-dashed border-gray-200">
@@ -45,11 +91,11 @@
                     <div class="grid grid-cols-2 gap-3 mb-6">
                         <div class="bg-amber-50/50 px-3 py-2 rounded-lg ring-1 ring-amber-900/5">
                             <span class="block text-[10px] uppercase font-bold text-amber-400">{{ __('Latitude') }}</span>
-                            <span class="font-mono text-sm text-gray-900">{{ number_format($client->latitude, 6) }}</span>
+                            <span class="font-mono text-sm text-gray-900">{{ number_format($client->premises_latitude, 6) }}</span>
                         </div>
                         <div class="bg-amber-50/50 px-3 py-2 rounded-lg ring-1 ring-amber-900/5">
                             <span class="block text-[10px] uppercase font-bold text-amber-400">{{ __('Longitude') }}</span>
-                            <span class="font-mono text-sm text-gray-900">{{ number_format($client->longitude, 6) }}</span>
+                            <span class="font-mono text-sm text-gray-900">{{ number_format($client->premises_longitude, 6) }}</span>
                         </div>
                     </div>
                 @endif
@@ -71,8 +117,8 @@
     <div class="lg:col-span-2">
         <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 overflow-hidden h-[600px] relative isolate"
              x-data="clientMap({
-                lat: @js($client->latitude),
-                lng: @js($client->longitude),
+                lat: @js($client->premises_latitude),
+                lng: @js($client->premises_longitude),
                 hasCoords: @js($client->hasCoordinates())
              })"
              wire:ignore>

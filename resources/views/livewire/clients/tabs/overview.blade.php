@@ -1,5 +1,4 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" wire:key="tab-overview">
-
     <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
         <div class="px-6 py-5 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-white rounded-t-2xl">
             <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-3">
@@ -26,11 +25,32 @@
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-xs font-bold text-emerald-700 uppercase tracking-wider">{{ __('Phone') }}</dt>
-                    <dd class="mt-1">
-                        <a href="tel:{{ $client->phone_number }}" class="text-sm font-medium text-gray-700 hover:text-emerald-600">
-                            {{ $client->phone_number ?? '-' }}
-                        </a>
+                    <dt class="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2">{{ __('Phone Numbers') }}</dt>
+                    <dd class="space-y-2">
+                        @forelse($client->phoneNumbers as $phone)
+                            <div class="flex items-center justify-between">
+                                <a href="tel:{{ $phone->phone_number }}" class="text-sm font-medium text-gray-700 hover:text-emerald-600 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                    </svg>
+                                    {{ $phone->phone_number }}
+                                </a>
+                                <div class="flex items-center gap-2">
+                                    @if($phone->label)
+                                        <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                            {{ $phone->label }}
+                                        </span>
+                                    @endif
+                                    @if($phone->is_primary)
+                                        <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                                            {{ __('Primary') }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        @empty
+                            <span class="text-sm text-gray-500">{{ __('No phone numbers') }}</span>
+                        @endforelse
                     </dd>
                 </div>
             </dl>

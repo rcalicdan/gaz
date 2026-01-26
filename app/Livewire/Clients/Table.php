@@ -107,8 +107,8 @@ class Table extends Component
     {
         return Client::query()
             ->selectRaw('COALESCE(premises_province, registered_province) as province')
-            ->whereNotNull('province')
-            ->where('province', '!=', '')
+            ->whereNotNull(\DB::raw('COALESCE(premises_province, registered_province)'))
+            ->whereRaw('COALESCE(premises_province, registered_province) != ?', [''])
             ->distinct()
             ->orderBy('province')
             ->pluck('province');
@@ -118,8 +118,8 @@ class Table extends Component
     {
         $query = Client::query()
             ->selectRaw('COALESCE(premises_city, registered_city) as city')
-            ->whereNotNull('city')
-            ->where('city', '!=', '');
+            ->whereNotNull(\DB::raw('COALESCE(premises_city, registered_city)'))
+            ->whereRaw('COALESCE(premises_city, registered_city) != ?', ['']);
 
         if ($this->filterProvince) {
             $query->where(function($q) {

@@ -19,16 +19,20 @@ class Client extends Model
         'vat_id',
         'contract_number',
         'contract_signed_date',
-        'street_name',
-        'street_number',
-        'city',
-        'zip_code',
-        'province',
-        'latitude',
-        'longitude',
+        'registered_street_name',
+        'registered_street_number',
+        'registered_city',
+        'registered_zip_code',
+        'registered_province',
+        'premises_street_name',
+        'premises_street_number',
+        'premises_city',
+        'premises_zip_code',
+        'premises_province',
+        'premises_latitude',
+        'premises_longitude',
         'contact_person',
         'email',
-        // 'phone_number',
         'brand_category',
         'default_waste_type_id',
         'price_list_id',
@@ -46,8 +50,8 @@ class Client extends Model
     protected function casts(): array
     {
         return [
-            'latitude' => 'decimal:8',
-            'longitude' => 'decimal:8',
+            'premises_latitude' => 'decimal:8',
+            'premises_longitude' => 'decimal:8',
             'price_rate' => 'decimal:2',
             'tax_rate' => 'integer',
             'auto_invoice' => 'boolean',
@@ -213,26 +217,31 @@ class Client extends Model
 
     public function getFullAddressAttribute(): string
     {
+        $streetParts = array_filter([
+            $this->premises_street_name ?? $this->registered_street_name,
+            $this->premises_street_number ?? $this->registered_street_number,
+        ]);
+        
         return trim(implode(', ', array_filter([
-            trim($this->street_name . ' ' . $this->street_number),
-            $this->zip_code,
-            $this->city,
-            $this->province,
+            trim(implode(' ', $streetParts)),
+            $this->premises_zip_code ?? $this->registered_zip_code,
+            $this->premises_city ?? $this->registered_city,
+            $this->premises_province ?? $this->registered_province,
         ])));
     }
 
     public function getCoordinatesAttribute(): ?array
     {
-        if ($this->latitude && $this->longitude) {
-            return [(float) $this->latitude, (float) $this->longitude];
+        if ($this->premises_latitude && $this->premises_longitude) {
+            return [(float) $this->premises_latitude, (float) $this->premises_longitude];
         }
         return null;
     }
 
     public function getVroomCoordinatesAttribute(): ?array
     {
-        if ($this->latitude && $this->longitude) {
-            return [(float) $this->longitude, (float) $this->latitude];
+        if ($this->premises_latitude && $this->premises_longitude) {
+            return [(float) $this->premises_longitude, (float) $this->premises_latitude];
         }
         return null;
     }
@@ -255,8 +264,8 @@ class Client extends Model
 
             if ($coordinates) {
                 $this->updateQuietly([
-                    'latitude' => $coordinates['lat'],
-                    'longitude' => $coordinates['lng']
+                    'premises_latitude' => $coordinates['lat'],
+                    'premises_longitude' => $coordinates['lng']
                 ]);
 
                 Log::info('Successfully geocoded address', [
@@ -323,27 +332,27 @@ class Client extends Model
 
     public function hasCoordinates(): bool
     {
-        return !is_null($this->latitude)
-            && !is_null($this->longitude)
-            && $this->latitude != 0
-            && $this->longitude != 0;
+        return !is_null($this->premises_latitude)
+            && !is_null($this->premises_longitude)
+            && $this->premises_latitude != 0
+            && $this->premises_longitude != 0;
     }
 
     public function scopeWithCoordinates($query)
     {
-        return $query->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->where('latitude', '!=', 0)
-            ->where('longitude', '!=', 0);
+        return $query->whereNotNull('premises_latitude')
+            ->whereNotNull('premises_longitude')
+            ->where('premises_latitude', '!=', 0)
+            ->where('premises_longitude', '!=', 0);
     }
 
     public function scopeWithoutCoordinates($query)
     {
         return $query->where(function ($q) {
-            $q->whereNull('latitude')
-                ->orWhereNull('longitude')
-                ->orWhere('latitude', 0)
-                ->orWhere('longitude', 0);
+            $q->whereNull('premises_latitude')
+                ->orWhereNull('premises_longitude')
+                ->orWhere('premises_latitude', 0)
+                ->orWhere('premises_longitude', 0);
         });
     }
 }

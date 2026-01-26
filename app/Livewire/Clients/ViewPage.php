@@ -12,7 +12,7 @@ class ViewPage extends Component
 
     public function mount(Client $client)
     {
-        $this->client = $client;
+        $this->client = $client->load('phoneNumbers', 'primaryPhoneNumber');
     }
 
     public function setTab($tab)
@@ -20,7 +20,6 @@ class ViewPage extends Component
         $this->activeTab = $tab;
 
         if ($tab === 'address') {
-            // Trigger Livewire-dispatched events so the frontend can react to tab activation
             $this->dispatch('init-map');
             $this->dispatch('invalidate-map-size');
         }
@@ -39,8 +38,8 @@ class ViewPage extends Component
             ]);
 
             $this->dispatch('update-map-coordinates', [
-                'lat' => $this->client->latitude,
-                'lng' => $this->client->longitude
+                'lat' => $this->client->premises_latitude,
+                'lng' => $this->client->premises_longitude
             ]);
         } else {
             $this->dispatch('show-message', [
