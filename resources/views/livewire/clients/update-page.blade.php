@@ -254,12 +254,21 @@
                     </x-forms.field>
 
                     <x-forms.field label="{{ __('Pickup Frequency') }}" name="pickup_frequency" required>
-                        <x-forms.select name="pickup_frequency" wire:model="pickup_frequency" :options="\App\Enums\PickupFrequency::options()"
+                        <x-forms.select name="pickup_frequency" wire:model.live="pickup_frequency" :options="\App\Enums\PickupFrequency::options()"
                             required />
                         <p class="mt-1 text-xs text-gray-500">
                             {{ __('Determines if the system auto-schedules the next pickup after completion.') }}
                         </p>
                     </x-forms.field>
+
+                    @if ($pickup_frequency === 'custom')
+                        <x-forms.field label="{{ __('Custom Pickup Days') }}" name="custom_pickup_days" required
+                            help="{{ __('Number of days between pickups (1-365)') }}">
+                            <x-forms.input type="number" name="custom_pickup_days" wire:model="custom_pickup_days"
+                                placeholder="{{ __('Enter number of days') }}" min="1" max="365"
+                                required :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z\'></path>'" />
+                        </x-forms.field>
+                    @endif
 
                     <div class="col-span-1 space-y-4">
                         <x-forms.field name="auto_invoice">

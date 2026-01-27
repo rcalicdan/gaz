@@ -8,6 +8,7 @@ enum PickupFrequency: string
     case WEEKLY = 'weekly';
     case BI_WEEKLY = 'bi_weekly';
     case MONTHLY = 'monthly';
+    case CUSTOM = 'custom';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum PickupFrequency: string
             self::WEEKLY => __('Weekly (7 Days)'),
             self::BI_WEEKLY => __('Bi-Weekly (14 Days)'),
             self::MONTHLY => __('Monthly (30 Days)'),
+            self::CUSTOM => __('Custom (Specify Days)'),
         };
     }
 
@@ -26,13 +28,16 @@ enum PickupFrequency: string
             self::WEEKLY => 7,
             self::BI_WEEKLY => 14,
             self::MONTHLY => 30,
+            self::CUSTOM => null,
         };
     }
 
     public static function options(): array
     {
-        return collect(self::cases())->mapWithKeys(fn($case) => [
-            $case->value => $case->label()
-        ])->toArray();
+        $options = [];
+        foreach (self::cases() as $case) {
+            $options[$case->value] = $case->label();
+        }
+        return $options;
     }
 }

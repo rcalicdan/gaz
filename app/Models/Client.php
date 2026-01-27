@@ -45,6 +45,7 @@ class Client extends Model
         'last_contact_date',
         'last_pickup_date',
         'pickup_frequency',
+        'custom_pickup_days',
     ];
 
     protected function casts(): array
@@ -60,6 +61,7 @@ class Client extends Model
             'last_pickup_date' => 'datetime',
             'contract_signed_date' => 'date',
             'pickup_frequency' => \App\Enums\PickupFrequency::class,
+            'custom_pickup_days' => 'integer',
         ];
     }
 
@@ -221,7 +223,7 @@ class Client extends Model
             $this->premises_street_name ?? $this->registered_street_name,
             $this->premises_street_number ?? $this->registered_street_number,
         ]);
-        
+
         return trim(implode(', ', array_filter([
             trim(implode(' ', $streetParts)),
             $this->premises_zip_code ?? $this->registered_zip_code,

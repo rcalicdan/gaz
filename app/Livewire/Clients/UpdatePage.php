@@ -33,6 +33,7 @@ class UpdatePage extends Component
     public $auto_invoice = false;
     public $auto_kpo = false;
     public $pickup_frequency = null;
+    public $custom_pickup_days = null;
     public $phoneNumbers = [];
     public $contract_number = '';
     public $contract_signed_date = '';
@@ -146,6 +147,13 @@ class UpdatePage extends Component
             'auto_invoice' => 'boolean',
             'auto_kpo' => 'boolean',
             'pickup_frequency' => 'required',
+            'custom_pickup_days' => [
+                Rule::requiredIf($this->pickup_frequency === 'custom'),
+                'nullable',
+                'integer',
+                'min:1',
+                'max:365'
+            ],
             'phoneNumbers.*.phone_number' => 'required|string|max:50',
             'phoneNumbers.*.label' => 'nullable|string|max:100',
             'phoneNumbers.*.is_primary' => 'boolean',
@@ -188,6 +196,7 @@ class UpdatePage extends Component
             'auto_invoice' => 'auto invoice',
             'auto_kpo' => 'auto KPO',
             'pickup_frequency' => 'pickup frequency',
+            'custom_pickup_days' => 'custom pickup days',
         ];
 
         foreach ($this->phoneNumbers as $index => $phone) {

@@ -5,6 +5,7 @@ namespace App\Livewire\Clients;
 use App\Services\ClientService;
 use App\Models\Client;
 use App\Models\WasteType;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class CreatePage extends Component
@@ -31,6 +32,7 @@ class CreatePage extends Component
     public $auto_invoice = false;
     public $auto_kpo = false;
     public $pickup_frequency = null;
+    public $custom_pickup_days = null;
     public $phoneNumbers = [];
     public $contract_number = '';
     public $contract_signed_date = '';
@@ -107,6 +109,13 @@ class CreatePage extends Component
             'auto_invoice' => 'boolean',
             'auto_kpo' => 'boolean',
             'pickup_frequency' => 'required',
+            'custom_pickup_days' => [
+                Rule::requiredIf($this->pickup_frequency === 'custom'),
+                'nullable',
+                'integer',
+                'min:1',
+                'max:365'
+            ],
             'phoneNumbers.*.phone_number' => 'required|string|max:50',
             'phoneNumbers.*.label' => 'nullable|string|max:100',
             'phoneNumbers.*.is_primary' => 'boolean',
@@ -149,6 +158,7 @@ class CreatePage extends Component
             'auto_invoice' => 'auto invoice',
             'auto_kpo' => 'auto KPO',
             'pickup_frequency' => 'pickup frequency',
+            'custom_pickup_days' => 'custom pickup days',
         ];
 
         foreach ($this->phoneNumbers as $index => $phone) {
@@ -183,6 +193,9 @@ class CreatePage extends Component
             'auto_invoice' => $this->auto_invoice,
             'auto_kpo' => $this->auto_kpo,
             'pickup_frequency' => $this->pickup_frequency,
+            'custom_pickup_days' => $this->pickup_frequency === 'custom'
+                ? $this->custom_pickup_days
+                : null,
         ];
 
         if ($this->has_separate_premises) {
