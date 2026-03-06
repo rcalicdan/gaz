@@ -92,6 +92,53 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
+        <div class="px-6 py-5 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white rounded-t-2xl">
+            <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-3">
+                <div class="p-2 bg-white ring-1 ring-blue-100 rounded-lg shadow-sm text-blue-600 group-hover:text-blue-700 group-hover:ring-blue-300 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                </div>
+                {{ __('Contract Information') }}
+            </h3>
+        </div>
+        <div class="px-6 py-6 relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-24 h-24 bg-white rounded-full opacity-0 blur-2xl pointer-events-none"></div>
+
+            <dl class="space-y-6 relative z-10">
+                @if($client->hasContract())
+                    <div>
+                        <dt class="text-xs font-bold text-blue-700 uppercase tracking-wider">{{ __('Contract Number') }}</dt>
+                        <dd class="mt-1">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-mono font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                {{ $client->contract_number }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold text-blue-700 uppercase tracking-wider">{{ __('Contract Signed') }}</dt>
+                        <dd class="mt-1 text-sm font-semibold text-gray-900">
+                            {{ $client->contract_signed_date_formatted }}
+                        </dd>
+                        @if($client->contract_age_formatted)
+                            <dd class="mt-1 text-xs text-gray-500">
+                                {{ $client->contract_age_formatted }} {{ __('ago') }}
+                            </dd>
+                        @endif
+                    </div>
+                @else
+                    <div class="text-center py-4">
+                        <div class="mx-auto h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">{{ __('No Contract') }}</p>
+                        <p class="text-xs text-gray-500">{{ __('Contract not signed yet') }}</p>
+                    </div>
+                @endif
+            </dl>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
         <div class="px-6 py-5 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-white rounded-t-2xl">
             <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-3">
                 <div class="p-2 bg-white ring-1 ring-emerald-100 rounded-lg shadow-sm text-emerald-600 group-hover:text-emerald-700 group-hover:ring-emerald-300 transition-all">
@@ -117,13 +164,23 @@
                     <dt class="text-sm font-medium text-gray-500">{{ __('Frequency') }}</dt>
                     <dd class="text-sm font-bold">
                         @if($client->pickup_frequency && $client->pickup_frequency !== \App\Enums\PickupFrequency::ON_DEMAND)
-                            <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-white px-2.5 py-0.5 rounded-full text-xs font-semibold ring-1 ring-inset ring-emerald-100">
-                                <span class="relative flex h-1.5 w-1.5">
-                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                  <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                            @if($client->pickup_frequency === \App\Enums\PickupFrequency::CUSTOM && $client->custom_pickup_days)
+                                <span class="inline-flex items-center gap-1.5 text-purple-700 bg-white px-2.5 py-0.5 rounded-full text-xs font-semibold ring-1 ring-inset ring-purple-100">
+                                    <span class="relative flex h-1.5 w-1.5">
+                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
+                                    </span>
+                                    {{ __('Custom') }}: {{ $client->custom_pickup_days }} {{ __('Days') }}
                                 </span>
-                                {{ $client->pickup_frequency->label() }}
-                            </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-white px-2.5 py-0.5 rounded-full text-xs font-semibold ring-1 ring-inset ring-emerald-100">
+                                    <span class="relative flex h-1.5 w-1.5">
+                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                    </span>
+                                    {{ $client->pickup_frequency->label() }}
+                                </span>
+                            @endif
                         @else
                             <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
                                 {{ $client->pickup_frequency?->label() ?? __('On Demand') }}
