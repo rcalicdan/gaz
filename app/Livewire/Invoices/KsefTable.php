@@ -13,7 +13,9 @@ class KsefTable extends Component
     use WithDataTable, WithPagination;
 
     public $filterStatus = '';
+
     public $filterDateFrom = '';
+
     public $filterDateTo = '';
 
     public function boot()
@@ -47,7 +49,10 @@ class KsefTable extends Component
 
     public function rowsQuery()
     {
-        $query = Invoice::query()->with(['client', 'pickup']);
+        $query = Invoice::query()
+            ->select('invoices.*')
+            ->leftJoin('clients', 'invoices.client_id', '=', 'clients.id')
+            ->with(['client', 'pickup']);
 
         if ($this->filterStatus !== '') {
             $query->where('ksef_status', $this->filterStatus);
@@ -59,10 +64,29 @@ class KsefTable extends Component
             $query->where('issue_date', '<=', $this->filterDateTo);
         }
 
-        return $this->applySearchAndSort($query, [
-            'invoice_number',
-            'ksef_reference_number'
-        ], $this->getDataTableConfig());
+        if ($this->search) {
+            $searchTerm = '%' . $this->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('invoices.invoice_number', 'ilike', $searchTerm)
+                    ->orWhere('invoices.ksef_reference_number', 'ilike', $searchTerm);
+            });
+        }
+
+        $sortColumn = $this->sortColumn ?: 'created_at';
+        $sortDirection = $this->sortDirection ?: 'desc';
+
+        switch ($sortColumn) {
+            case 'client.company_name':
+                $query->orderBy('clients.company_name', $sortDirection);
+                break;
+            default:
+                if (\in_array($sortColumn, ['id', 'invoice_number', 'issue_date', 'created_at'])) {
+                    $query->orderBy('invoices.' . $sortColumn, $sortDirection);
+                }
+                break;
+        }
+
+        return $query;
     }
 
     public function resetFilters()
