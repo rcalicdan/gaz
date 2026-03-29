@@ -6,6 +6,7 @@ use App\Enums\KsefStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Invoice extends Model
@@ -27,6 +28,7 @@ class Invoice extends Model
         'ksef_xml_content',
         'pdf_url',
         'is_emailed',
+        'ksef_session_reference',
     ];
 
     protected function casts(): array
@@ -40,6 +42,21 @@ class Invoice extends Model
             'ksef_status' => KsefStatus::class,
             'is_emailed' => 'boolean',
         ];
+    }
+
+    public function getKsefStatusLabelAttribute(): string
+    {
+        return $this->ksef_status ? $this->ksef_status->label() : '';
+    }
+
+    public function getKsefStatusColorAttribute(): string
+    {
+        return $this->ksef_status ? $this->ksef_status->color() : 'gray';
+    }
+
+    public function getKsefReferenceNumberDisplayAttribute(): string
+    {
+        return $this->ksef_reference_number ?: __('Not yet provided');
     }
 
     public function pickup(): BelongsTo
@@ -60,5 +77,10 @@ class Invoice extends Model
     public function printLogs(): MorphMany
     {
         return $this->morphMany(PrintLog::class, 'document');
+    }
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(InvoiceLog::class)->orderBy('created_at', 'desc');
     }
 }

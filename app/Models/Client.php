@@ -46,6 +46,7 @@ class Client extends Model
         'last_pickup_date',
         'pickup_frequency',
         'custom_pickup_days',
+        'declaration_expiry_date',
     ];
 
     protected function casts(): array
@@ -62,6 +63,7 @@ class Client extends Model
             'contract_signed_date' => 'date',
             'pickup_frequency' => \App\Enums\PickupFrequency::class,
             'custom_pickup_days' => 'integer',
+            'declaration_expiry_date' => 'date',
         ];
     }
 
@@ -356,5 +358,24 @@ class Client extends Model
                 ->orWhere('premises_latitude', 0)
                 ->orWhere('premises_longitude', 0);
         });
+    }
+
+    public function scopeDeclarationExpiringSoon($query, int $days = 30)
+    {
+        return $query->whereNotNull('declaration_expiry_date')
+            ->whereBetween('declaration_expiry_date', [now()->startOfDay(), now()->addDays($days)->endOfDay()]);
+    }
+
+    public function getDeclarationDaysUntilExpiryAttribute(): ?int
+    {
+        if (!$this->declaration_expiry_date) {
+            return null;
+        }
+        return (int) now()->startOfDay()->diffInDays($this->declaration_expiry_date, false);
+    }
+
+    public function isDeclarationExpired(): bool
+    {
+        return $this->declaration_expiry_date && $this->declaration_expiry_date->isPast();
     }
 }

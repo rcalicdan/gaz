@@ -36,6 +36,7 @@ class CreatePage extends Component
     public $phoneNumbers = [];
     public $contract_number = '';
     public $contract_signed_date = '';
+    public $declaration_expiry_date = '';
 
     protected ClientService $clientService;
 
@@ -95,6 +96,7 @@ class CreatePage extends Component
             'vat_id' => 'nullable|string|max:50|unique:clients,vat_id',
             'contract_number' => 'nullable|string|max:255|unique:clients,contract_number',
             'contract_signed_date' => 'nullable|date',
+            'declaration_expiry_date' => 'nullable|date',
             'registered_street_name' => 'required|string|max:255',
             'registered_street_number' => 'nullable|string|max:50',
             'registered_city' => 'required|string|max:255',
@@ -151,6 +153,7 @@ class CreatePage extends Component
             'contact_person' => 'contact person',
             'contract_number' => 'contract number',
             'contract_signed_date' => 'contract signed date',
+            'declaration_expiry_date' => 'declaration expiry date',
             'brand_category' => 'brand category',
             'default_waste_type_id' => 'default waste type',
             'price_rate' => 'price rate',
@@ -178,7 +181,8 @@ class CreatePage extends Component
             'company_name' => $this->company_name,
             'vat_id' => $this->vat_id,
             'contract_number' => $this->contract_number,
-            'contract_signed_date' => $this->contract_signed_date,
+            'contract_signed_date' => $this->contract_signed_date ?: null,
+            'declaration_expiry_date' => $this->declaration_expiry_date ?: null,
             'registered_street_name' => $this->registered_street_name,
             'registered_street_number' => $this->registered_street_number,
             'registered_city' => $this->registered_city,

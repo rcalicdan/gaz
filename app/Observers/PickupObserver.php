@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\PickupFrequency;
 use App\Enums\PickupStatus;
 use App\Models\Pickup;
+use App\Services\InvoiceService;
 use Illuminate\Support\Facades\Log;
 
 class PickupObserver
@@ -16,8 +17,21 @@ class PickupObserver
             $client = $pickup->client;
 
             $client->update([
-                'last_contact_date' => now()
+                'last_contact_date' => now(),
+                'last_pickup_date' => now(),
             ]);
+
+            if ($client->auto_invoice) {
+                try {
+                    app(InvoiceService::class)->generateForPickup($pickup);
+                    
+                    Log::info("Auto-invoice triggered for completed Pickup #{$pickup->id}", [
+                        'client_id' => $client->id
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error("Failed to generate auto-invoice for Pickup #{$pickup->id}: " . $e->getMessage());
+                }
+            }
 
             $this->handleAutoScheduling($pickup, $client);
         }
@@ -47,12 +61,12 @@ class PickupObserver
                 Pickup::create([
                     'client_id' => $client->id,
                     'waste_type_id' => $previousPickup->waste_type_id, 
-                    'driver_id' => $previousPickup->driver_id, 
+                    'assigned_driver_id' => $previousPickup->assigned_driver_id, 
                     'route_id' => $previousPickup->route_id,
                     'scheduled_date' => $nextDate,
                     'status' => PickupStatus::SCHEDULED,
                     'applied_price_rate' => $client->price_rate ?? $previousPickup->applied_price_rate,
-                    'driver_note' => 'Auto-generated: ' . $client->pickup_frequency->label(),
+                    'driver_note' => 'Auto-generated frequency: ' . $client->pickup_frequency->label(),
                 ]);
 
                 Log::info("Auto-scheduled next pickup for Client #{$client->id} on {$nextDate->format('Y-m-d')}");

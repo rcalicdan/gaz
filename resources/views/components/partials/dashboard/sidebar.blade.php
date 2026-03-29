@@ -8,8 +8,11 @@
     class="fixed inset-y-0 left-0 z-30 flex flex-col w-64 bg-emerald-50 shadow-lg transform transition-all duration-300 ease-in-out md:translate-x-0">
 
     <div class="flex flex-col items-center justify-center h-24 border-b border-gray-200 flex-shrink-0">
-        <svg class="mx-auto mb-1 text-emerald-700" style="height:2em;width:2em;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2c-2.21 0-4 1.79-4 4 0 3.31 4 6 4 6s4-2.69 4-6c0-2.21-1.79-4-4-4zM6 14c-1.1 1.1-2 3-2 4 0 .55.45 1 1 1h12c.55 0 1-.45 1-1 0-1-1-2.9-2-4-2 1-5 1-10 0z" fill="currentColor"/>
+        <svg class="mx-auto mb-1 text-emerald-700" style="height:2em;width:2em;" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M12 2c-2.21 0-4 1.79-4 4 0 3.31 4 6 4 6s4-2.69 4-6c0-2.21-1.79-4-4-4zM6 14c-1.1 1.1-2 3-2 4 0 .55.45 1 1 1h12c.55 0 1-.45 1-1 0-1-1-2.9-2-4-2 1-5 1-10 0z"
+                fill="currentColor" />
         </svg>
         <span class="block text-2xl font-extrabold text-emerald-800 tracking-tight mt-1">{{ config('app.name') }}</span>
     </div>
@@ -46,6 +49,11 @@
         @can('viewAny', App\Models\Route::class)
             <x-dashboard.sidebar-link href="{{ route('routes.index') }}" icon="fas fa-route" :active="request()->routeIs('routes.*')"
                 :label="__('Routes')" />
+        @endcan
+
+        @can('viewAny', App\Models\Invoice::class)
+            <x-dashboard.sidebar-link href="{{ route('invoices.index') }}" icon="fas fa-file-invoice-dollar"
+                :active="request()->routeIs('invoices.*')" :label="__('KSeF Invoices')" />
         @endcan
     </nav>
 

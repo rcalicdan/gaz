@@ -40,6 +40,11 @@ Route::middleware('auth')->group(function () {
         Route::get('{pickup}/boxes/create', \App\Livewire\Boxes\CreatePage::class)->name('boxes.create');
     });
 
+    Route::prefix('invoices')->name('invoices.')->group(function () {
+        Route::get('', \App\Livewire\Invoices\KsefTable::class)->name('index');
+        Route::get('{invoice}', \App\Livewire\Invoices\ViewPage::class)->name('view'); 
+    });
+
     Route::prefix('boxes')->name('boxes.')->group(function () {
         Route::get('{pickupBox}/edit', \App\Livewire\Boxes\UpdatePage::class)->name('edit');
         Route::get('{pickupBox}', \App\Livewire\Boxes\ViewPage::class)->name('show');

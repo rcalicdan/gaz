@@ -1,6 +1,8 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 my-auto">
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <form wire:submit.prevent="save" class="p-6 space-y-8">
+
+            {{-- Company Information --}}
             <div class="space-y-6">
                 <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
                     {{ __('Company Information') }}
@@ -27,6 +29,12 @@
                             :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z\'></path>'" />
                     </x-forms.field>
 
+                    <x-forms.field label="{{ __('Declaration Expiry Date') }}" name="declaration_expiry_date"
+                        help="{{ __('A dashboard alert will appear 30 days before expiry') }}">
+                        <x-forms.input type="date" name="declaration_expiry_date"
+                            wire:model="declaration_expiry_date" :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\'></path>'" />
+                    </x-forms.field>
+
                     <x-forms.field label="{{ __('Brand Category') }}" name="brand_category">
                         <x-forms.input name="brand_category" wire:model="brand_category"
                             placeholder="{{ __('Enter brand category') }}" :icon="'<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z\'></path>'" />
@@ -39,6 +47,7 @@
                 </div>
             </div>
 
+            {{-- Registered Address --}}
             <div class="space-y-6">
                 <div class="flex items-center gap-2">
                     <div class="p-2 bg-blue-50 rounded-lg">
@@ -82,6 +91,7 @@
                 </div>
             </div>
 
+            {{-- Premises Address --}}
             <div class="space-y-6">
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-2">
@@ -107,7 +117,8 @@
                 @if (!$has_separate_premises)
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
                         <div class="flex items-center gap-2 text-sm text-gray-600">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -116,7 +127,8 @@
                     </div>
                 @else
                     <p class="text-sm text-gray-600 -mt-2 ml-14">
-                        {{ __('Physical location for waste pickup (will be geocoded for route optimization)') }}</p>
+                        {{ __('Physical location for waste pickup (will be geocoded for route optimization)') }}
+                    </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <x-forms.field class="md:col-span-2" label="{{ __('Street Name') }}"
@@ -148,6 +160,7 @@
                 @endif
             </div>
 
+            {{-- Contact Information --}}
             <div class="space-y-6">
                 <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
                     {{ __('Contact Information') }}
@@ -165,6 +178,7 @@
                     </x-forms.field>
                 </div>
 
+                {{-- Phone Numbers --}}
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <label class="block text-sm font-medium text-gray-700">
@@ -174,7 +188,7 @@
                             class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-emerald-700 bg-emerald-100 hover:bg-emerald-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4"></path>
+                                    d="M12 4v16m8-8H4" />
                             </svg>
                             {{ __('Add Phone Number') }}
                         </button>
@@ -212,8 +226,7 @@
                                         title="{{ $phone['is_primary'] ? __('Primary Contact') : __('Set as Primary') }}">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path
-                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                                            </path>
+                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
                                     </button>
 
@@ -224,8 +237,7 @@
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                </path>
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
                                     @endif
@@ -236,6 +248,7 @@
                 </div>
             </div>
 
+            {{-- Pricing & Settings --}}
             <div class="space-y-6">
                 <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
                     {{ __('Pricing & Settings') }}
@@ -286,11 +299,13 @@
                 </div>
             </div>
 
+            {{-- Form Actions --}}
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                 <x-utils.link-button href="{{ route('clients.index') }}" buttonText="{{ __('Cancel') }}" />
                 <x-utils.submit-button wire-target="save" buttonText="{{ __('Create Client') }}"
                     bgColor="bg-emerald-700" hoverColor="hover:bg-emerald-900" focusRing="focus:ring-indigo-500" />
             </div>
+
         </form>
     </div>
 </div>

@@ -13,6 +13,7 @@ class RemindersWidget extends Component
 
     public $activeTab = 'scheduled';
     public $daysThreshold = 30;
+    public $declarationDaysThreshold = 30;
     public $showModal = false;
     public $modalClientId = null;
     public $modalNote = '';
@@ -55,7 +56,6 @@ class RemindersWidget extends Component
     public function completeReminder($reminderId)
     {
         $reminder = Reminder::find($reminderId);
-
         $reminder->update(['status' => 'completed']);
 
         $this->dispatch('show-message', ['type' => 'success', 'message' => __('Reminder completed!')]);
@@ -63,7 +63,7 @@ class RemindersWidget extends Component
 
     public function render()
     {
-        $rows = [];
+        $rows = collect();
 
         if ($this->activeTab === 'scheduled') {
             $rows = Reminder::with('client')
@@ -71,9 +71,15 @@ class RemindersWidget extends Component
                 ->where('reminder_date', '<=', now())
                 ->orderBy('reminder_date', 'asc')
                 ->paginate(5);
-        } else {
+
+        } elseif ($this->activeTab === 'stale') {
             $rows = Client::needsContact($this->daysThreshold)
                 ->orderBy('last_contact_date', 'asc')
+                ->paginate(5);
+
+        } elseif ($this->activeTab === 'expiring_declarations') {
+            $rows = Client::declarationExpiringSoon($this->declarationDaysThreshold)
+                ->orderBy('declaration_expiry_date', 'asc')
                 ->paginate(5);
         }
 

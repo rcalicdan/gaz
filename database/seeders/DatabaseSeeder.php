@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             RouteOptimizationSeeder::class,
             PickupSeeder::class,
             PickupBoxSeeder::class,
+            InvoiceSeeder::class,
         ]);
     }
 }

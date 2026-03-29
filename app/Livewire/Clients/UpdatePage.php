@@ -37,6 +37,7 @@ class UpdatePage extends Component
     public $phoneNumbers = [];
     public $contract_number = '';
     public $contract_signed_date = '';
+    public $declaration_expiry_date = '';
 
     protected ClientService $clientService;
 
@@ -52,6 +53,7 @@ class UpdatePage extends Component
         $this->vat_id = $client->vat_id;
         $this->contract_number = $client->contract_number;
         $this->contract_signed_date = $client->contract_signed_date?->format('Y-m-d');
+        $this->declaration_expiry_date = $client->declaration_expiry_date?->format('Y-m-d');
         $this->registered_street_name = $client->registered_street_name;
         $this->registered_street_number = $client->registered_street_number;
         $this->registered_city = $client->registered_city;
@@ -133,6 +135,7 @@ class UpdatePage extends Component
             'vat_id' => ['nullable', 'string', 'max:50', Rule::unique('clients')->ignore($this->client->id)],
             'contract_number' => ['nullable', 'string', 'max:255', Rule::unique('clients')->ignore($this->client->id)],
             'contract_signed_date' => 'nullable|date',
+            'declaration_expiry_date' => 'nullable|date',
             'registered_street_name' => 'required|string|max:255',
             'registered_street_number' => 'nullable|string|max:50',
             'registered_city' => 'required|string|max:255',
@@ -189,6 +192,7 @@ class UpdatePage extends Component
             'contact_person' => 'contact person',
             'contract_number' => 'contract number',
             'contract_signed_date' => 'contract signed date',
+            'declaration_expiry_date' => 'declaration expiry date',
             'brand_category' => 'brand category',
             'default_waste_type_id' => 'default waste type',
             'price_rate' => 'price rate',
@@ -216,7 +220,8 @@ class UpdatePage extends Component
             'company_name' => $this->company_name,
             'vat_id' => $this->vat_id,
             'contract_number' => $this->contract_number,
-            'contract_signed_date' => $this->contract_signed_date,
+            'contract_signed_date' => $this->contract_signed_date ?: null,
+            'declaration_expiry_date' => $this->declaration_expiry_date ?: null,
             'registered_street_name' => $this->registered_street_name,
             'registered_street_number' => $this->registered_street_number,
             'registered_city' => $this->registered_city,
@@ -231,6 +236,9 @@ class UpdatePage extends Component
             'auto_invoice' => $this->auto_invoice,
             'auto_kpo' => $this->auto_kpo,
             'pickup_frequency' => $this->pickup_frequency,
+            'custom_pickup_days' => $this->pickup_frequency === 'custom'
+                ? $this->custom_pickup_days
+                : null,
         ];
 
         if ($this->has_separate_premises) {

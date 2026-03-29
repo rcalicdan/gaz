@@ -25,13 +25,13 @@ class ClientFactory extends Factory
 
         $location = fake()->randomElement($locations);
         $plFaker = fake('pl_PL');
-        
+
         $hasDifferentPremises = fake()->boolean(60);
 
         $data = [
             'company_name' => fake()->company(),
-            'vat_id' => fake()->numerify('PL##########'),
-            
+            'vat_id' => fake()->regexify('[1-9]{1}[0-9]{9}'),
+
             'registered_street_name' => fake()->streetName(),
             'registered_street_number' => fake()->buildingNumber(),
             'registered_city' => $location['city'],
@@ -78,7 +78,7 @@ class ClientFactory extends Factory
 
     public function withCoordinates(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'premises_latitude' => fake()->latitude(49.0, 54.8),
             'premises_longitude' => fake()->longitude(14.1, 24.1),
         ]);
@@ -86,12 +86,12 @@ class ClientFactory extends Factory
 
     public function withoutCoordinates(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'premises_latitude' => null,
             'premises_longitude' => null,
         ]);
     }
-    
+
     public function withSeparatePremises(): static
     {
         $locations = [
@@ -99,11 +99,11 @@ class ClientFactory extends Factory
             ['city' => 'Kraków', 'province' => 'Małopolskie', 'lat' => 50.0681, 'lng' => 19.9479],
             ['city' => 'Gdańsk', 'province' => 'Pomorskie', 'lat' => 54.3478, 'lng' => 18.6496],
         ];
-        
+
         $location = fake()->randomElement($locations);
         $plFaker = fake('pl_PL');
-        
-        return $this->state(fn (array $attributes) => [
+
+        return $this->state(fn(array $attributes) => [
             'premises_street_name' => fake()->streetName(),
             'premises_street_number' => fake()->buildingNumber(),
             'premises_city' => $location['city'],

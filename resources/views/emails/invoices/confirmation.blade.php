@@ -1,27 +1,16 @@
 @extends('emails.layouts.master')
 
-@section('title', 'Dokument KPO')
-@section('header', 'Dokument KPO')
+@section('title', 'Potwierdzenie Wystawienia Faktury')
+@section('header', 'Potwierdzenie Faktury')
 
 @section('content')
     <p style="margin: 0 0 20px 0; font-size: 16px; color: #15491A; line-height: 1.6;">
         Dzień dobry,
     </p>
 
-    @if ($customMessage)
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 25px;">
-            <tr>
-                <td style="background-color: #F0F9F1; border-left: 5px solid #4CAF50; padding: 20px; border-radius: 4px;">
-                    <p style="margin: 0; color: #1F6B26; font-style: italic; font-size: 15px; line-height: 1.6;">
-                        {!! nl2br(e($customMessage)) !!}
-                    </p>
-                </td>
-            </tr>
-        </table>
-    @endif
-
     <p style="margin: 0 0 25px 0; font-size: 16px; color: #444444; line-height: 1.6;">
-        W załączeniu przesyłamy dokument <strong>KPO</strong> (Oświadczenie dotyczące przekazania odpadów).
+        Informujemy, że w systemie <strong>Olejos</strong> została wystawiona faktura w Państwa imieniu za wykonany odbiór
+        odpadów. Dokument został pomyślnie przetworzony przez system KSeF.
     </p>
 
     <table border="0" cellpadding="0" cellspacing="0" width="100%"
@@ -33,28 +22,43 @@
                         <tr>
                             <td width="40%"
                                 style="padding: 10px 0; border-bottom: 1px solid #DFF4DD; color: #2E7D32; font-size: 14px; font-weight: 600;">
-                                Numer KPO:</td>
+                                Numer faktury:</td>
                             <td width="60%"
                                 style="padding: 10px 0; border-bottom: 1px solid #DFF4DD; color: #15491A; font-size: 14px; text-align: right;">
-                                {{ $kpoDocument->kpo_number }}</td>
+                                {{ $invoice->invoice_number }}</td>
                         </tr>
                         <tr>
                             <td
                                 style="padding: 10px 0; border-bottom: 1px solid #DFF4DD; color: #2E7D32; font-size: 14px; font-weight: 600;">
-                                Data utworzenia:</td>
-                            <td
-                                style="padding: 10px 0; border-bottom: 1px solid #DFF4DD; color: #15491A; font-size: 14px; text-align: right;">
-                                {{ $kpoDocument->created_at->format('d.m.Y H:i') }}</td>
+                                Numer KSeF:</td>
+                            <td width="60%"
+                                style="padding: 10px 0; border-bottom: 1px solid #DFF4DD; color: #15491A; font-size: 14px; font-weight: 600; text-align: right;">
+                                {{ $invoice->ksef_reference_number }}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; color: #2E7D32; font-size: 14px; font-weight: 600;">Ilość:</td>
+                            <td
+                                style="padding: 10px 0; border-bottom: 1px solid #DFF4DD; color: #2E7D32; font-size: 14px; font-weight: 600;">
+                                Data wystawienia:</td>
+                            <td
+                                style="padding: 10px 0; border-bottom: 1px solid #DFF4DD; color: #15491A; font-size: 14px; text-align: right;">
+                                {{ $invoice->issue_date->format('d.m.Y') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #2E7D32; font-size: 14px; font-weight: 600;">Kwota do
+                                zapłaty:</td>
                             <td
                                 style="padding: 10px 0; color: #15491A; font-size: 14px; font-weight: 700; text-align: right;">
-                                {{ number_format($kpoDocument->quantity, 2) }} kg</td>
+                                {{ number_format($invoice->gross_amount, 2, ',', ' ') }}
+                                {{ $invoice->client->currency ?? 'PLN' }}
+                            </td>
                         </tr>
                     </table>
                 </td>
             </tr>
         </tbody>
     </table>
+
+    <p style="margin: 0 0 25px 0; font-size: 15px; color: #666666; line-height: 1.6;">
+        Dokument jest dostępny do wglądu w Państwa panelu KSeF przy użyciu powyższego numeru KSeF.
+    </p>
 @endsection

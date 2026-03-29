@@ -1,9 +1,13 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" wire:key="tab-overview">
+
+    {{-- Contact Details --}}
     <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
         <div class="px-6 py-5 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-white rounded-t-2xl">
             <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-3">
                 <div class="p-2 bg-white ring-1 ring-emerald-100 rounded-lg shadow-sm text-emerald-600 group-hover:text-emerald-700 group-hover:ring-emerald-300 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
                 </div>
                 {{ __('Contact Details') }}
             </h3>
@@ -19,7 +23,8 @@
                 <div>
                     <dt class="text-xs font-bold text-emerald-700 uppercase tracking-wider">{{ __('Email') }}</dt>
                     <dd class="mt-1">
-                        <a href="mailto:{{ $client->email }}" class="text-sm font-medium text-gray-700 hover:text-emerald-600 hover:underline transition-colors">
+                        <a href="mailto:{{ $client->email }}"
+                            class="text-sm font-medium text-gray-700 hover:text-emerald-600 hover:underline transition-colors">
                             {{ $client->email }}
                         </a>
                     </dd>
@@ -29,9 +34,10 @@
                     <dd class="space-y-2">
                         @forelse($client->phoneNumbers as $phone)
                             <div class="flex items-center justify-between">
-                                <a href="tel:{{ $phone->phone_number }}" class="text-sm font-medium text-gray-700 hover:text-emerald-600 flex items-center gap-2">
+                                <a href="tel:{{ $phone->phone_number }}"
+                                    class="text-sm font-medium text-gray-700 hover:text-emerald-600 flex items-center gap-2">
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
                                     {{ $phone->phone_number }}
                                 </a>
@@ -57,11 +63,14 @@
         </div>
     </div>
 
+    {{-- Company Details --}}
     <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
         <div class="px-6 py-5 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-white rounded-t-2xl">
             <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-3">
                 <div class="p-2 bg-white ring-1 ring-emerald-100 rounded-lg shadow-sm text-emerald-800 group-hover:text-emerald-900 group-hover:ring-emerald-300 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
                 </div>
                 {{ __('Company Details') }}
             </h3>
@@ -74,8 +83,10 @@
                     <dt class="text-xs font-bold text-emerald-700 uppercase tracking-wider">{{ __('VAT ID') }}</dt>
                     <dd class="mt-1">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-mono font-medium bg-gray-50 text-gray-700 border border-gray-200">
-                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            {{ $client->vat_id }}
+                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            {{ $client->vat_id ?? __('Not provided') }}
                         </span>
                     </dd>
                 </div>
@@ -91,11 +102,14 @@
         </div>
     </div>
 
+    {{-- Contract Information --}}
     <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
         <div class="px-6 py-5 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white rounded-t-2xl">
             <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-3">
                 <div class="p-2 bg-white ring-1 ring-blue-100 rounded-lg shadow-sm text-blue-600 group-hover:text-blue-700 group-hover:ring-blue-300 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
                 </div>
                 {{ __('Contract Information') }}
             </h3>
@@ -109,7 +123,9 @@
                         <dt class="text-xs font-bold text-blue-700 uppercase tracking-wider">{{ __('Contract Number') }}</dt>
                         <dd class="mt-1">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-mono font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                                <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
                                 {{ $client->contract_number }}
                             </span>
                         </dd>
@@ -128,7 +144,9 @@
                 @else
                     <div class="text-center py-4">
                         <div class="mx-auto h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                         </div>
                         <p class="text-sm font-medium text-gray-900">{{ __('No Contract') }}</p>
                         <p class="text-xs text-gray-500">{{ __('Contract not signed yet') }}</p>
@@ -138,11 +156,147 @@
         </div>
     </div>
 
+    {{-- Declaration Expiry --}}
+    @php
+        $daysLeft = $client->declaration_days_until_expiry;
+        $hasDeclaration = !is_null($client->declaration_expiry_date);
+        $isExpired = $hasDeclaration && $daysLeft !== null && $daysLeft <= 0;
+        $isUrgent = $hasDeclaration && $daysLeft !== null && $daysLeft > 0 && $daysLeft <= 7;
+        $isWarning = $hasDeclaration && $daysLeft !== null && $daysLeft > 7 && $daysLeft <= 30;
+
+        $accentColor = match(true) {
+            $isExpired => ['border' => 'border-red-100', 'gradient' => 'from-red-50', 'ring' => 'ring-red-100', 'icon' => 'text-red-600', 'dt' => 'text-red-700', 'hover_ring' => 'group-hover:ring-red-300'],
+            $isUrgent  => ['border' => 'border-orange-100', 'gradient' => 'from-orange-50', 'ring' => 'ring-orange-100', 'icon' => 'text-orange-600', 'dt' => 'text-orange-700', 'hover_ring' => 'group-hover:ring-orange-300'],
+            $isWarning => ['border' => 'border-amber-100', 'gradient' => 'from-amber-50', 'ring' => 'ring-amber-100', 'icon' => 'text-amber-600', 'dt' => 'text-amber-700', 'hover_ring' => 'group-hover:ring-amber-300'],
+            default    => ['border' => 'border-emerald-100', 'gradient' => 'from-emerald-50', 'ring' => 'ring-emerald-100', 'icon' => 'text-emerald-600', 'dt' => 'text-emerald-700', 'hover_ring' => 'group-hover:ring-emerald-300'],
+        };
+    @endphp
+    <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
+        <div class="px-6 py-5 border-b {{ $accentColor['border'] }} bg-gradient-to-r {{ $accentColor['gradient'] }} to-white rounded-t-2xl">
+            <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-3">
+                <div class="p-2 bg-white ring-1 {{ $accentColor['ring'] }} rounded-lg shadow-sm {{ $accentColor['icon'] }} {{ $accentColor['hover_ring'] }} transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                {{ __('Declaration') }}
+
+                {{-- Urgency pill in the header --}}
+                @if($isExpired)
+                    <span class="ml-auto inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-200">
+                        {{ __('Expired') }}
+                    </span>
+                @elseif($isUrgent)
+                    <span class="ml-auto inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-700 ring-1 ring-inset ring-orange-200">
+                        {{ __(':days days left', ['days' => $daysLeft]) }}
+                    </span>
+                @elseif($isWarning)
+                    <span class="ml-auto inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
+                        {{ __(':days days left', ['days' => $daysLeft]) }}
+                    </span>
+                @endif
+            </h3>
+        </div>
+        <div class="px-6 py-6 relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-24 h-24 bg-white rounded-full opacity-0 blur-2xl pointer-events-none"></div>
+
+            <dl class="space-y-6 relative z-10">
+                @if($hasDeclaration)
+                    <div>
+                        <dt class="text-xs font-bold {{ $accentColor['dt'] }} uppercase tracking-wider">
+                            {{ __('Expiry Date') }}
+                        </dt>
+                        <dd class="mt-1 text-sm font-semibold text-gray-900">
+                            {{ $client->declaration_expiry_date->format('d.m.Y') }}
+                        </dd>
+                    </div>
+
+                    <div>
+                        <dt class="text-xs font-bold {{ $accentColor['dt'] }} uppercase tracking-wider">
+                            {{ __('Status') }}
+                        </dt>
+                        <dd class="mt-2">
+                            @if($isExpired)
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-200">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ __('Expired') }}
+                                </span>
+                            @elseif($isUrgent)
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700 ring-1 ring-inset ring-orange-200">
+                                    <span class="relative flex h-1.5 w-1.5">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-orange-500"></span>
+                                    </span>
+                                    {{ __('Expiring Soon') }}
+                                </span>
+                            @elseif($isWarning)
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
+                                    <span class="relative flex h-1.5 w-1.5">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+                                    </span>
+                                    {{ __('Expiring in :days days', ['days' => $daysLeft]) }}
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    {{ __('Valid') }}
+                                </span>
+                            @endif
+                        </dd>
+                    </div>
+
+                    @if(!$isExpired && $daysLeft !== null)
+                        <div>
+                            <dt class="text-xs font-bold {{ $accentColor['dt'] }} uppercase tracking-wider">
+                                {{ __('Time Remaining') }}
+                            </dt>
+                            <dd class="mt-2">
+                                {{-- Progress bar --}}
+                                @php
+                                    $totalWindow = 365;
+                                    $progressPct = min(100, max(0, round(($daysLeft / $totalWindow) * 100)));
+                                    $barColor = $isUrgent ? 'bg-orange-500' : ($isWarning ? 'bg-amber-400' : 'bg-emerald-500');
+                                @endphp
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                        <div class="{{ $barColor }} h-1.5 rounded-full transition-all duration-500"
+                                            style="width: {{ $progressPct }}%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">
+                                        {{ $daysLeft }} {{ __('days') }}
+                                    </span>
+                                </div>
+                            </dd>
+                        </div>
+                    @endif
+                @else
+                    <div class="text-center py-4">
+                        <div class="mx-auto h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">{{ __('No Declaration Set') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Edit the client to add an expiry date') }}</p>
+                    </div>
+                @endif
+            </dl>
+        </div>
+    </div>
+
+    {{-- Service Settings --}}
     <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group">
         <div class="px-6 py-5 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-white rounded-t-2xl">
             <h3 class="text-base font-semibold leading-6 text-gray-900 flex items-center gap-3">
                 <div class="p-2 bg-white ring-1 ring-emerald-100 rounded-lg shadow-sm text-emerald-600 group-hover:text-emerald-700 group-hover:ring-emerald-300 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
                 {{ __('Service Settings') }}
             </h3>
@@ -159,7 +313,6 @@
                     <dt class="text-sm font-medium text-gray-500">{{ __('Price Rate') }}</dt>
                     <dd class="text-sm font-bold text-emerald-900">{{ $client->price_rate }} {{ $client->currency }}</dd>
                 </div>
-
                 <div class="flex justify-between items-center border-b border-emerald-50/50 pb-3">
                     <dt class="text-sm font-medium text-gray-500">{{ __('Frequency') }}</dt>
                     <dd class="text-sm font-bold">
@@ -167,16 +320,16 @@
                             @if($client->pickup_frequency === \App\Enums\PickupFrequency::CUSTOM && $client->custom_pickup_days)
                                 <span class="inline-flex items-center gap-1.5 text-purple-700 bg-white px-2.5 py-0.5 rounded-full text-xs font-semibold ring-1 ring-inset ring-purple-100">
                                     <span class="relative flex h-1.5 w-1.5">
-                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
                                     </span>
                                     {{ __('Custom') }}: {{ $client->custom_pickup_days }} {{ __('Days') }}
                                 </span>
                             @else
                                 <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-white px-2.5 py-0.5 rounded-full text-xs font-semibold ring-1 ring-inset ring-emerald-100">
                                     <span class="relative flex h-1.5 w-1.5">
-                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                                     </span>
                                     {{ $client->pickup_frequency->label() }}
                                 </span>
@@ -193,21 +346,30 @@
                     <div class="flex flex-col items-center justify-center p-3 rounded-xl transition-colors {{ $client->auto_invoice ? 'bg-white text-emerald-700 ring-1 ring-emerald-100' : 'bg-gray-50 text-gray-400 ring-1 ring-gray-200' }}">
                         <span class="text-[10px] font-black uppercase tracking-widest mb-1">{{ __('Invoice') }}</span>
                         @if($client->auto_invoice)
-                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
                         @else
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         @endif
                     </div>
                     <div class="flex flex-col items-center justify-center p-3 rounded-xl transition-colors {{ $client->auto_kpo ? 'bg-white text-emerald-700 ring-1 ring-emerald-100' : 'bg-gray-50 text-gray-400 ring-1 ring-gray-200' }}">
                         <span class="text-[10px] font-black uppercase tracking-widest mb-1">{{ __('KPO') }}</span>
                         @if($client->auto_kpo)
-                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
                         @else
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         @endif
                     </div>
                 </div>
             </dl>
         </div>
     </div>
+
 </div>

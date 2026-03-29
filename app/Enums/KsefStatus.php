@@ -33,7 +33,7 @@ enum KsefStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => __('Pending'),
             self::SENT_TO_KSEF => __('Sent to KSeF'),
             self::ACCEPTED => __('Accepted'),
@@ -44,7 +44,7 @@ enum KsefStatus: string
 
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => 'gray',
             self::SENT_TO_KSEF => 'blue',
             self::ACCEPTED => 'green',
@@ -55,7 +55,7 @@ enum KsefStatus: string
 
     public function icon(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => 'clock',
             self::SENT_TO_KSEF => 'upload',
             self::ACCEPTED => 'check-circle',
@@ -81,7 +81,7 @@ enum KsefStatus: string
 
     public function nextStatuses(): array
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => [self::SENT_TO_KSEF],
             self::SENT_TO_KSEF => [self::ACCEPTED, self::REJECTED],
             self::ACCEPTED => [self::PAID],

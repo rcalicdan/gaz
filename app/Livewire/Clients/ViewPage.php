@@ -12,7 +12,11 @@ class ViewPage extends Component
 
     public function mount(Client $client)
     {
-        $this->client = $client->load('phoneNumbers', 'primaryPhoneNumber');
+        $this->client = $client->load([
+            'phoneNumbers',
+            'primaryPhoneNumber',
+            'defaultWasteType',
+        ]);
     }
 
     public function setTab($tab)
