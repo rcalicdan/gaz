@@ -42,7 +42,7 @@
                     <div>
                         <livewire:components.searchable-select :modelClass="\App\Models\Client::class" :selected="$client_id" name="client_id"
                             label="{{ __('Client') }}" placeholder="{{ __('Search client by name, VAT, or city...') }}"
-                            displayField="company_name" :searchFields="['company_name', 'vat_id', 'city', 'contact_person']" :required="true" :key="'client-select'" />
+                            displayField="company_name" :searchFields="['company_name', 'vat_id', 'registered_city', 'contact_person']" :required="true" :key="'client-select'" />
                     </div>
 
                     {{-- Driver Searchable Select --}}
