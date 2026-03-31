@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\KpoDocumentController;
 use App\Http\Controllers\Api\Routing\RouteDataController;
 
@@ -45,6 +46,10 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/saved-optimization', [RouteDataController::class, 'getSavedRouteOptimization']);
         Route::get('/driver-optimizations', [RouteDataController::class, 'getMyRouteOptimizations']);
         Route::delete('/delete-optimization', [RouteDataController::class, 'deleteSavedRouteOptimization']);
+    });
+
+    Route::prefix('invoices')->group(function () {
+        Route::post('/generate-for-pickup/{pickup}', [InvoiceController::class, 'generateForPickup']);
     });
 
     Route::post('vroom/optimize', [RouteDataController::class, 'optimize']);
