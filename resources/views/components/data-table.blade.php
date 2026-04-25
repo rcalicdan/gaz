@@ -19,7 +19,8 @@
                             {{ __('items selected.') }}
                         @endif
                         @if ($selectPage && !$selectAll && $data->total() > $data->count())
-                            <button wire:click="selectAll" class="ml-2 text-emerald-600 hover:underline focus:outline-none">
+                            <button wire:click="selectAll"
+                                class="ml-2 text-emerald-600 hover:underline focus:outline-none">
                                 {{ __('Select all :total items.', ['total' => $data->total()]) }}
                             </button>
                         @endif
@@ -110,52 +111,60 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <!-- Mobile Card View -->
         <div class="sm:hidden">
-            @forelse($data as $row)
-                <div
-                    class="border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors duration-150 {{ in_array($row->id, $selectedRows) ? 'ring-1 ring-emerald-100' : '' }}">
-                    <div class="flex">
-                        @if ($showBulkActions)
-                            <div class="pr-4 flex-shrink-0">
-                                <input type="checkbox" wire:model.live="selectedRows" value="{{ $row->id }}"
-                                    class="form-checkbox h-4 w-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 mt-1">
-                            </div>
-                        @endif
-                        <div class="flex-grow">
-                            @foreach ($headers as $header)
-                                @if ($this->shouldShowOnMobile($header))
-                                    <div class="flex justify-between items-start py-1">
-                                        <span
-                                            class="text-sm font-medium text-gray-500">{{ __($header['label']) }}:</span>
-                                        <span class="text-sm text-gray-900 ml-2 text-right">
-                                            @php $value = $this->getHeaderValue($header, $row) @endphp
-                                            @include('components.partials.data-table.cell', [
-                                                'header' => $header,
-                                                'value' => $value,
-                                            ])
-                                        </span>
+            @if ($data->isEmpty())
+                @include('components.partials.data-table.empty')
+            @else
+                @if (isset($customMobileColumns) && $customMobileColumns->isNotEmpty())
+                    {{ $customMobileColumns }}
+                @else
+                    @foreach ($data as $row)
+                        <div
+                            class="border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors duration-150 {{ in_array($row->id, $selectedRows) ? 'ring-1 ring-emerald-100' : '' }}">
+                            <div class="flex">
+                                @if ($showBulkActions)
+                                    <div class="pr-4 flex-shrink-0">
+                                        <input type="checkbox" wire:model.live="selectedRows"
+                                            value="{{ $row->id }}"
+                                            class="form-checkbox h-4 w-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 mt-1">
                                     </div>
                                 @endif
-                            @endforeach
+                                <div class="flex-grow">
+                                    @foreach ($headers as $header)
+                                        @if ($this->shouldShowOnMobile($header))
+                                            <div class="flex justify-between items-start py-1">
+                                                <span
+                                                    class="text-sm font-medium text-gray-500">{{ __($header['label']) }}:</span>
+                                                <span class="text-sm text-gray-900 ml-2 text-right">
+                                                    @php $value = $this->getHeaderValue($header, $row) @endphp
+                                                    @include('components.partials.data-table.cell', [
+                                                        'header' => $header,
+                                                        'value' => $value,
+                                                    ])
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                            @if ($showActions)
+                                <div class="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                                    @if ($viewRoute && $this->canViewRow($row))
+                                        <x-utils.view-button :route="$this->getViewRoute($row)" />
+                                    @endif
+                                    @if ($editRoute && $this->canEditRow($row))
+                                        <x-utils.update-button :route="$this->getEditRoute($row)" />
+                                    @endif
+                                    @if ($deleteAction && $this->canDeleteRow($row))
+                                        <x-utils.delete-button :wireClick="$this->getDeleteAction($row)" />
+                                    @endif
+                                </div>
+                            @endif
                         </div>
-                    </div>
-                    @if ($showActions)
-                        <div class="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                            @if ($viewRoute && $this->canViewRow($row))
-                                <x-utils.view-button :route="$this->getViewRoute($row)" />
-                            @endif
-                            @if ($editRoute && $this->canEditRow($row))
-                                <x-utils.update-button :route="$this->getEditRoute($row)" />
-                            @endif
-                            @if ($deleteAction && $this->canDeleteRow($row))
-                                <x-utils.delete-button :wireClick="$this->getDeleteAction($row)" />
-                            @endif
-                        </div>
-                    @endif
-                </div>
-            @empty
-                @include('components.partials.data-table.empty')
-            @endforelse
+                    @endforeach
+                @endif
+            @endif
         </div>
+
         <!-- Desktop Table View -->
         <div class="hidden sm:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -170,8 +179,7 @@
                         @foreach ($headers as $header)
                             <th scope="col"
                                 class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                @if (isset($header['sortable']) && $header['sortable']) style="cursor: pointer;"
-                            wire:click="sortBy('{{ $header['key'] }}')" @endif>
+                                @if (isset($header['sortable']) && $header['sortable']) style="cursor: pointer;" wire:click="sortBy('{{ $header['key'] }}')" @endif>
                                 <div class="flex items-center gap-2 hover:text-gray-700 transition-colors">
                                     <span class="truncate">{{ __($header['label']) }}</span>
                                     @if (isset($header['sortable']) && $header['sortable'])
@@ -184,57 +192,64 @@
                         @endforeach
                         @if ($showActions)
                             <th scope="col"
-                                class="px-3 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                class="px-3 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ __('Actions') }}
                             </th>
                         @endif
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($data as $row)
-                        <tr
-                            class="hover:bg-gray-50 transition-colors duration-150 {{ in_array($row->id, $selectedRows) ? 'ring-1 ring-emerald-100' : '' }}">
-                            @if ($showBulkActions)
-                                <td class="px-3 lg:px-6 py-4">
-                                    <input type="checkbox" wire:model.live="selectedRows" value="{{ $row->id }}"
-                                        class="form-checkbox h-4 w-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
-                                </td>
-                            @endif
-                            @foreach ($headers as $header)
-                                <td class="px-3 lg:px-6 py-4 text-sm text-gray-900">
-                                    @php $value = $this->getHeaderValue($header, $row) @endphp
-                                    <div class="max-w-xs truncate">
-                                        @include('components.partials.data-table.cell', [
-                                            'header' => $header,
-                                            'value' => $value,
-                                        ])
-                                    </div>
-                                </td>
-                            @endforeach
-                            @if ($showActions)
-                                <td class="px-3 lg:px-6 py-4 text-sm text-gray-900 align-middle">
-                                    <div class="flex items-center justify-center gap-2">
-                                        @if ($viewRoute && $this->canViewRow($row))
-                                            <x-utils.view-button :route="$this->getViewRoute($row)" />
-                                        @endif
-                                        @if ($editRoute && $this->canEditRow($row))
-                                            <x-utils.update-button :route="$this->getEditRoute($row)" />
-                                        @endif
-                                        @if ($deleteAction && $this->canDeleteRow($row))
-                                            <x-utils.delete-button :wireClick="$this->getDeleteAction($row)" />
-                                        @endif
-                                    </div>
-                                </td>
-                            @endif
-                        </tr>
-                    @empty
+                    @if ($data->isEmpty())
                         <tr>
                             <td colspan="{{ count($headers) + ($showActions ? 1 : 0) + ($showBulkActions ? 1 : 0) }}"
                                 class="text-center py-12">
                                 @include('components.partials.data-table.empty')
                             </td>
                         </tr>
-                    @endforelse
+                    @else
+                        @if (isset($customColumns) && $customColumns->isNotEmpty())
+                            {{ $customColumns }}
+                        @else
+                            @foreach ($data as $row)
+                                <tr
+                                    class="hover:bg-gray-50 transition-colors duration-150 {{ in_array($row->id, $selectedRows) ? 'ring-1 ring-emerald-100' : '' }}">
+                                    @if ($showBulkActions)
+                                        <td class="px-3 lg:px-6 py-4">
+                                            <input type="checkbox" wire:model.live="selectedRows"
+                                                value="{{ $row->id }}"
+                                                class="form-checkbox h-4 w-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
+                                        </td>
+                                    @endif
+                                    @foreach ($headers as $header)
+                                        <td class="px-3 lg:px-6 py-4 text-sm text-gray-900">
+                                            @php $value = $this->getHeaderValue($header, $row) @endphp
+                                            <div class="max-w-xs truncate">
+                                                @include('components.partials.data-table.cell', [
+                                                    'header' => $header,
+                                                    'value' => $value,
+                                                ])
+                                            </div>
+                                        </td>
+                                    @endforeach
+                                    @if ($showActions)
+                                        <td class="px-3 lg:px-6 py-4 text-sm text-gray-900 align-middle">
+                                            <div class="flex items-center justify-end gap-2">
+                                                @if ($viewRoute && $this->canViewRow($row))
+                                                    <x-utils.view-button :route="$this->getViewRoute($row)" />
+                                                @endif
+                                                @if ($editRoute && $this->canEditRow($row))
+                                                    <x-utils.update-button :route="$this->getEditRoute($row)" />
+                                                @endif
+                                                @if ($deleteAction && $this->canDeleteRow($row))
+                                                    <x-utils.delete-button :wireClick="$this->getDeleteAction($row)" />
+                                                @endif
+                                            </div>
+                                        </td>
+                                    @endif
+                                </tr>
+                            @endforeach
+                        @endif
+                    @endif
                 </tbody>
             </table>
         </div>

@@ -112,12 +112,9 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <x-data-table :data="$this->rows" :headers="$dataTable['headers']" :showActions="true" :showSearch="$dataTable['showSearch']" :showCreate="$dataTable['showCreate']"
-            :createRoute="$dataTable['createRoute']" :createButtonName="$dataTable['createButtonName']" :editRoute="$dataTable['editRoute']" :viewRoute="$dataTable['viewRoute']" :deleteAction="$dataTable['deleteAction']"
-            :searchPlaceholder="$dataTable['searchPlaceholder']" :emptyMessage="$dataTable['emptyMessage']" :searchQuery="$search" :sortColumn="$sortColumn" :sortDirection="$sortDirection"
-            :showBulkActions="$dataTable['showBulkActions']" :bulkDeleteAction="$dataTable['bulkDeleteAction']" :selectedRowsCount="$selectedRowsCount" :selectAll="$selectAll" :selectPage="$selectPage"
-            :selectedRows="$selectedRows">
-        </x-data-table>
-    </div>
+    <x-data-table :data="$this->rows" :headers="$dataTable['headers']" :showActions="true" :showSearch="$dataTable['showSearch']" :showCreate="$dataTable['showCreate']"
+        :createRoute="$dataTable['createRoute']" :createButtonName="$dataTable['createButtonName']" :editRoute="$dataTable['editRoute']" :viewRoute="$dataTable['viewRoute']" :deleteAction="$dataTable['deleteAction']"
+        :searchPlaceholder="$dataTable['searchPlaceholder']" :emptyMessage="$dataTable['emptyMessage']" :searchQuery="$search" :sortColumn="$sortColumn" :sortDirection="$sortDirection"
+        :showBulkActions="$dataTable['showBulkActions']" :bulkDeleteAction="$dataTable['bulkDeleteAction']" :selectedRowsCount="$selectedRowsCount" :selectAll="$selectAll" :selectPage="$selectPage"
+        :selectedRows="$selectedRows" />
 </div>

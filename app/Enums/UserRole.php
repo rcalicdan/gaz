@@ -2,15 +2,12 @@
 
 namespace App\Enums;
 
-use App\Traits\TranslatableEnums;
-
 enum UserRole: string
 {
-    // use TranslatableEnums;
-
     case ADMIN = 'admin';
     case EMPLOYEE = 'employee';
     case DRIVER = 'driver';
+    case CLIENT = 'client';
 
     public static function values(): array
     {
@@ -28,6 +25,7 @@ enum UserRole: string
             self::ADMIN->value => self::ADMIN->label(),
             self::EMPLOYEE->value => self::EMPLOYEE->label(),
             self::DRIVER->value => self::DRIVER->label(),
+            self::CLIENT->value => self::CLIENT->label(),
         ];
     }
 
@@ -37,6 +35,7 @@ enum UserRole: string
             self::ADMIN => __('Administrator'),
             self::EMPLOYEE => __('Employee'),
             self::DRIVER => __('Driver'),
+            self::CLIENT => __('Client'),
         };
     }
 
@@ -46,6 +45,7 @@ enum UserRole: string
             self::ADMIN => 'red',
             self::EMPLOYEE => 'blue',
             self::DRIVER => 'green',
+            self::CLIENT => 'purple',
         };
     }
 

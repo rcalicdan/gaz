@@ -76,15 +76,13 @@ class Table extends Component
 
     public function rowsQuery()
     {
-        $query = User::query();
+        $query = User::query()->where('role', '!=', \App\Enums\UserRole::CLIENT->value);
 
-        // Apply status filter
         if ($this->statusFilter === 'active') {
             $query->active();
         } elseif ($this->statusFilter === 'inactive') {
             $query->inactive();
         }
-        // 'all' means no filter applied
 
         $dataTable = $this->getDataTableConfig();
 

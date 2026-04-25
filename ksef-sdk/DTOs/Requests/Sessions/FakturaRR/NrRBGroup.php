@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Rcalicdan\KSEFClient\DTOs\Requests\Sessions\FakturaRR;
+
+use DOMDocument;
+use Rcalicdan\KSEFClient\Contracts\DomSerializableInterface;
+use Rcalicdan\KSEFClient\Support\AbstractDTO;
+use Rcalicdan\KSEFClient\Support\Optional;
+use Rcalicdan\KSEFClient\ValueObjects\Requests\Sessions\NrRB;
+use Rcalicdan\KSEFClient\ValueObjects\Requests\Sessions\SWIFT;
+use Rcalicdan\KSEFClient\ValueObjects\Requests\XmlNamespace;
+
+final class NrRBGroup extends AbstractDTO implements DomSerializableInterface
+{
+    /**
+     * @param NrRB $nrRB Pełny numer rachunku
+     * @param Optional|SWIFT $swift Kod SWIFT
+     */
+    public function __construct(
+        public readonly NrRB $nrRB,
+        public readonly Optional | SWIFT $swift = new Optional(),
+    ) {
+    }
+
+    public function toDom(): DOMDocument
+    {
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $dom->formatOutput = true;
+
+        $nrRBGroup = $dom->createElementNS((string) XmlNamespace::FaRr1->value, 'NrRBGroup');
+        $dom->appendChild($nrRBGroup);
+
+        $nrRB = $dom->createElementNS((string) XmlNamespace::FaRr1->value, 'NrRB');
+        $nrRB->appendChild($dom->createTextNode((string) $this->nrRB));
+
+        $nrRBGroup->appendChild($nrRB);
+
+        if ($this->swift instanceof SWIFT) {
+            $swift = $dom->createElementNS((string) XmlNamespace::FaRr1->value, 'SWIFT');
+            $swift->appendChild($dom->createTextNode((string) $this->swift));
+
+            $nrRBGroup->appendChild($swift);
+        }
+
+        return $dom;
+    }
+}

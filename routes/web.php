@@ -13,6 +13,12 @@ Route::middleware('auth')->group(function () {
         Route::get('{user}/edit', \App\Livewire\Users\UpdatePage::class)->name('edit');
     });
 
+    Route::prefix('client-users')->name('client-users.')->group(function () {
+        Route::get('', \App\Livewire\ClientUsers\Table::class)->name('index');
+        Route::get('create', \App\Livewire\ClientUsers\CreatePage::class)->name('create');
+        Route::get('{user}/edit', \App\Livewire\ClientUsers\UpdatePage::class)->name('edit');
+    });
+
     Route::prefix('waste-types')->name('waste-types.')->group(function () {
         Route::get('', \App\Livewire\WasteTypes\Table::class)->name('index');
         Route::get('create', \App\Livewire\WasteTypes\CreatePage::class)->name('create');
@@ -42,13 +48,20 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('invoices')->name('invoices.')->group(function () {
         Route::get('', \App\Livewire\Invoices\KsefTable::class)->name('index');
-        Route::get('{invoice}', \App\Livewire\Invoices\ViewPage::class)->name('view'); 
+        Route::get('{invoice}', \App\Livewire\Invoices\ViewPage::class)->name('view');
+    });
+
+    Route::prefix('kpo-documents')->name('kpo-documents.')->group(function () {
+        Route::get('', \App\Livewire\KpoDocuments\Table::class)->name('index');
+        Route::get('{kpoDocument}', \App\Livewire\KpoDocuments\ViewPage::class)->name('view');
     });
 
     Route::prefix('boxes')->name('boxes.')->group(function () {
         Route::get('{pickupBox}/edit', \App\Livewire\Boxes\UpdatePage::class)->name('edit');
         Route::get('{pickupBox}', \App\Livewire\Boxes\ViewPage::class)->name('show');
     });
+
+    
 
     Route::view('routes', 'contents.routes.index')->name('routes.index');
 });

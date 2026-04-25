@@ -5,6 +5,64 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\KpoDocumentController;
 use App\Http\Controllers\Api\Routing\RouteDataController;
+use App\Http\Controllers\Api\ClientApp\ClientAuthController;
+use App\Http\Controllers\Api\ClientApp\ClientProfileController;
+use App\Http\Controllers\Api\ClientApp\ClientWasteTypeController;
+use App\Http\Controllers\Api\ClientApp\ClientOrderController;
+use App\Http\Controllers\Api\ClientApp\ClientInvoiceController;
+use App\Http\Controllers\Api\ClientApp\ClientKpoController;
+use App\Http\Controllers\Api\ClientApp\ClientSupportController;
+use App\Http\Controllers\Api\ClientApp\ClientWasteRecordController;
+
+Route::prefix('client-app')->group(function () {
+
+    Route::prefix('auth')->controller(ClientAuthController::class)->group(function () {
+        Route::post('/register', 'register');
+        Route::post('/login', 'login');
+    });
+
+    Route::middleware('auth:api')->group(function () {
+
+        Route::post('/auth/logout', [ClientAuthController::class, 'logout']);
+
+        Route::prefix('profile')->controller(ClientProfileController::class)->group(function () {
+            Route::get('/', 'show');
+            Route::put('/', 'update');
+        });
+
+        Route::get('/waste-types', [ClientWasteTypeController::class, 'index']);
+
+        Route::prefix('orders')->controller(ClientOrderController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store');
+            Route::get('/{id}', 'show');
+            Route::put('/{id}/cancel', 'cancel');
+        });
+
+        Route::prefix('invoices')->controller(ClientInvoiceController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::get('/{id}', 'show');
+            Route::get('/{id}/download', 'download');
+        });
+
+        Route::prefix('documents/kpo')->controller(ClientKpoController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::get('/{id}', 'show');
+            Route::get('/{id}/download', 'download');
+        });
+
+           Route::prefix('waste')->controller(ClientWasteRecordController::class)->group(function () {
+            Route::get('/records', 'index');
+            Route::get('/records/export', 'export');
+            Route::get('/statistics', 'statistics');
+        });
+
+        Route::prefix('support')->controller(ClientSupportController::class)->group(function () {
+            Route::get('/contact-info', 'contactInfo');
+            Route::post('/messages', 'sendMessage');
+        });
+    });
+});
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);

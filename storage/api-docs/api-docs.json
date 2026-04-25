@@ -1,0 +1,1878 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Olejos Backend API",
+        "description": "API endpoints for the application",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local Development Server"
+        }
+    ],
+    "paths": {
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "operationId": "d43ecdfd17aca209ecd9b0a8b370e2c0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "Kyle"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Lowry"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "admin",
+                                        "enum": [
+                                            "admin",
+                                            "driver",
+                                            "employee"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User registered successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "type": "object"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user",
+                "operationId": "be2e78e5f93182d4403f839cc516d312",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "403": {
+                        "description": "Account deactivated"
+                    }
+                }
+            }
+        },
+        "/api/auth/user": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get authenticated user",
+                "operationId": "ef55dd2df03069c922062d357ce4b720",
+                "responses": {
+                    "200": {
+                        "description": "User data retrieved successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update authenticated user",
+                "operationId": "fa1373e2962b769ba3b6a90b8113bfda",
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "operationId": "0b366af9c6842623aab9c8827c519b89",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    },
+                    "500": {
+                        "description": "Logout failed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/check-email": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Check if email exists",
+                "operationId": "9407a5a90c57abedabb44802d73decb7",
+                "responses": {
+                    "200": {
+                        "description": "Email check completed"
+                    }
+                }
+            }
+        },
+        "/api/invoices/generate-for-pickup/{pickup}": {
+            "post": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Manually generate and submit an invoice for a completed pickup",
+                "description": "Creates an invoice for the given pickup and immediately dispatches it to KSeF.",
+                "operationId": "dd5205e0716d6c10443d03fbf2cb28e9",
+                "parameters": [
+                    {
+                        "name": "pickup",
+                        "in": "path",
+                        "description": "Pickup ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 42
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Invoice created successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "409": {
+                        "description": "Conflict - Invoice exists"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/{kpoDocument}": {
+            "get": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Get KPO document details",
+                "operationId": "a457225caa9327ed9d2b1a080fee0610",
+                "parameters": [
+                    {
+                        "name": "kpoDocument",
+                        "in": "path",
+                        "description": "KPO Document ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KPO document details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "kpo_number": {
+                                                    "type": "string",
+                                                    "example": "KPO-2026-00001"
+                                                },
+                                                "waste_code": {
+                                                    "type": "string",
+                                                    "example": "30 01 25"
+                                                },
+                                                "quantity": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 150.5
+                                                },
+                                                "additional_notes": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "pdf_url": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "pdf_path": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "pdf_version": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "pdf_generated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "nullable": true
+                                                },
+                                                "pdf_size": {
+                                                    "type": "string",
+                                                    "example": "256 KB"
+                                                },
+                                                "pdf_exists": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "needs_regeneration": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "is_emailed": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "KPO document not found"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents": {
+            "get": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "List KPO documents with filters",
+                "operationId": "cd2f5333515db19cb29b2fd646abe80b",
+                "parameters": [
+                    {
+                        "name": "pickup_id",
+                        "in": "query",
+                        "description": "Filter by pickup ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "client_id",
+                        "in": "query",
+                        "description": "Filter by client ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "is_emailed",
+                        "in": "query",
+                        "description": "Filter by email status",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "from_date",
+                        "in": "query",
+                        "description": "Filter from date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to_date",
+                        "in": "query",
+                        "description": "Filter to date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by KPO number",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of KPO documents",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/generate-for-pickup/{pickup}": {
+            "post": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Generate KPO PDF for a pickup",
+                "operationId": "374c1370bada1bbadf21becfd12358ca",
+                "parameters": [
+                    {
+                        "name": "pickup",
+                        "in": "path",
+                        "description": "Pickup ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PDF generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "PDF generated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "kpo_document_id": {
+                                                    "type": "integer"
+                                                },
+                                                "kpo_number": {
+                                                    "type": "string"
+                                                },
+                                                "pdf_url": {
+                                                    "type": "string"
+                                                },
+                                                "pdf_path": {
+                                                    "type": "string"
+                                                },
+                                                "pdf_version": {
+                                                    "type": "integer"
+                                                },
+                                                "path": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Pickup not found"
+                    },
+                    "500": {
+                        "description": "Failed to generate PDF"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/generate-my-pickup": {
+            "post": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Generate KPO PDF for driver's assigned pickup",
+                "operationId": "e5b6bd24b20709d826e9b63d7c5982a7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "pickup_id"
+                                ],
+                                "properties": {
+                                    "pickup_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "PDF generated successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Not a driver or pickup not assigned"
+                    },
+                    "404": {
+                        "description": "Pickup not found"
+                    },
+                    "500": {
+                        "description": "Failed to generate PDF"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/{kpoDocument}/generate-pdf": {
+            "post": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Generate or regenerate PDF for KPO document",
+                "operationId": "5c748a89d0c43216676b0d8609f507e4",
+                "parameters": [
+                    {
+                        "name": "kpoDocument",
+                        "in": "path",
+                        "description": "KPO Document ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PDF generated successfully"
+                    },
+                    "404": {
+                        "description": "KPO document not found"
+                    },
+                    "500": {
+                        "description": "Failed to generate PDF"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/{kpoDocument}/download": {
+            "get": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Download KPO PDF document",
+                "operationId": "0f123c37e98c59192a68fefd0d44bf1c",
+                "parameters": [
+                    {
+                        "name": "kpoDocument",
+                        "in": "path",
+                        "description": "KPO Document ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PDF file downloaded",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "PDF file not found"
+                    },
+                    "500": {
+                        "description": "Failed to download PDF"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/{kpoDocument}/preview": {
+            "get": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Preview KPO PDF document in browser",
+                "operationId": "6ea5ea55e5f6383c4fd68cb31e34eb17",
+                "parameters": [
+                    {
+                        "name": "kpoDocument",
+                        "in": "path",
+                        "description": "KPO Document ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PDF file preview",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "PDF file not found"
+                    },
+                    "500": {
+                        "description": "Failed to preview PDF"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/{kpoDocument}/email-to-client": {
+            "post": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Email KPO document to registered client",
+                "operationId": "a569e23a7d8d07817f3cc81f30b3e233",
+                "parameters": [
+                    {
+                        "name": "kpoDocument",
+                        "in": "path",
+                        "description": "KPO Document ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "custom_message": {
+                                        "description": "Custom message to include in email",
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 1000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "kpo_number": {
+                                                    "type": "string"
+                                                },
+                                                "recipient_email": {
+                                                    "type": "string"
+                                                },
+                                                "sent_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client email not found"
+                    },
+                    "500": {
+                        "description": "Failed to send email"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/{kpoDocument}/email-to-custom": {
+            "post": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Email KPO document to custom email address (Admin/Employee only)",
+                "operationId": "915bfc65ee19a78ed1803c672e7939cf",
+                "parameters": [
+                    {
+                        "name": "kpoDocument",
+                        "in": "path",
+                        "description": "KPO Document ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "recipient_email",
+                                    "authorization_reason"
+                                ],
+                                "properties": {
+                                    "recipient_email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "custom@example.com"
+                                    },
+                                    "custom_message": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 1000
+                                    },
+                                    "authorization_reason": {
+                                        "description": "Reason for sending to custom email (GDPR audit)",
+                                        "type": "string",
+                                        "example": "Client requested delivery to alternative email",
+                                        "maxLength": 500
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email sent successfully"
+                    },
+                    "403": {
+                        "description": "Unauthorized - Admin/Employee only"
+                    },
+                    "500": {
+                        "description": "Failed to send email"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/{kpoDocument}/email-history": {
+            "get": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Get email sending history for KPO document (GDPR audit trail)",
+                "operationId": "f316a8cfd2e9dc9b13066ad655f0af92",
+                "parameters": [
+                    {
+                        "name": "kpoDocument",
+                        "in": "path",
+                        "description": "KPO Document ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email history retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "recipient_email": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "type": "object"
+                                                    },
+                                                    "sent_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "error_message": {
+                                                        "type": "string",
+                                                        "nullable": true
+                                                    },
+                                                    "sent_by": {
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "KPO document not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/email-logs/{emailLog}/retry": {
+            "post": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Retry failed email sending",
+                "operationId": "62c04af8c17d0cf1bd25f982e901d6e7",
+                "parameters": [
+                    {
+                        "name": "emailLog",
+                        "in": "path",
+                        "description": "Email Log ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "custom_message": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "maxLength": 1000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email retry sent successfully"
+                    },
+                    "400": {
+                        "description": "Email cannot be retried or not a KPO document"
+                    },
+                    "500": {
+                        "description": "Failed to retry email"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/{kpoDocument}/email-statistics": {
+            "get": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Get email statistics for KPO document",
+                "operationId": "347dec60c14ff75a24a52c30c1167002",
+                "parameters": [
+                    {
+                        "name": "kpoDocument",
+                        "in": "path",
+                        "description": "KPO Document ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email statistics retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "kpo_number": {
+                                                    "type": "string"
+                                                },
+                                                "statistics": {
+                                                    "properties": {
+                                                        "total_sent": {
+                                                            "type": "integer"
+                                                        },
+                                                        "successful": {
+                                                            "type": "integer"
+                                                        },
+                                                        "failed": {
+                                                            "type": "integer"
+                                                        },
+                                                        "bounced": {
+                                                            "type": "integer"
+                                                        },
+                                                        "last_sent_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "nullable": true
+                                                        },
+                                                        "unique_recipients": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "KPO document not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/pickup/{pickup}/download": {
+            "get": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Download KPO PDF by pickup",
+                "operationId": "4002ad541729348fb893f0a8e2656a32",
+                "parameters": [
+                    {
+                        "name": "pickup",
+                        "in": "path",
+                        "description": "Pickup ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PDF downloaded"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "KPO document not found for this pickup"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kpo-documents/pickup/{pickup}/preview": {
+            "get": {
+                "tags": [
+                    "KPO Documents"
+                ],
+                "summary": "Preview KPO PDF by pickup",
+                "operationId": "a3459081ece9ceb25108d23f883d787c",
+                "parameters": [
+                    {
+                        "name": "pickup",
+                        "in": "path",
+                        "description": "Pickup ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PDF preview"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "KPO document not found for this pickup"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/vroom/optimize": {
+            "post": {
+                "tags": [
+                    "Route Optimization"
+                ],
+                "summary": "Optimize routes using VROOM engine",
+                "operationId": "e113c1052fcd1cce886a80eb693c450f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "description": "VROOM optimization payload",
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Optimization successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Optimization service unavailable"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/drivers": {
+            "get": {
+                "tags": [
+                    "Route Data"
+                ],
+                "summary": "Get all drivers",
+                "operationId": "d310296adb69d5d6ccef310f56f41109",
+                "responses": {
+                    "200": {
+                        "description": "Drivers retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/orders": {
+            "get": {
+                "tags": [
+                    "Route Data"
+                ],
+                "summary": "Get orders for specific driver and date",
+                "operationId": "465b1a928469b0d29b19848c8b273728",
+                "parameters": [
+                    {
+                        "name": "driver_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2024-01-15"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Orders retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "driver_id": {
+                                                    "type": "integer"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "total_count": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/all-orders": {
+            "get": {
+                "tags": [
+                    "Route Data"
+                ],
+                "summary": "Get all orders for date range",
+                "operationId": "700479dcd6604c41d56db457ade09e32",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2024-01-01"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2024-01-31"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Orders retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/save-optimization": {
+            "post": {
+                "tags": [
+                    "Route Optimization"
+                ],
+                "summary": "Save route optimization result",
+                "operationId": "a7b8ebca7ad4e499a07f480673f9c3ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "driver_id",
+                                    "optimization_date"
+                                ],
+                                "properties": {
+                                    "driver_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "optimization_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-15"
+                                    },
+                                    "optimization_result": {
+                                        "type": "object"
+                                    },
+                                    "order_sequence": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "total_distance": {
+                                        "type": "number",
+                                        "example": 45.5
+                                    },
+                                    "total_time": {
+                                        "type": "integer",
+                                        "example": 3600
+                                    },
+                                    "is_manual_edit": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "manual_modifications": {
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Route optimization saved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        },
+                                        "requires_optimization": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/saved-optimization": {
+            "get": {
+                "tags": [
+                    "Route Optimization"
+                ],
+                "summary": "Get saved route optimization",
+                "operationId": "0860419985120e0fa781407662efd558",
+                "parameters": [
+                    {
+                        "name": "driver_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2024-01-15"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Saved optimization retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/geocode": {
+            "post": {
+                "tags": [
+                    "Route Data"
+                ],
+                "summary": "Trigger geocoding for missing coordinates",
+                "operationId": "3f1b1d98f6d7658be77e97c5b5f4e520",
+                "responses": {
+                    "200": {
+                        "description": "Geocoding completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/statistics": {
+            "get": {
+                "tags": [
+                    "Route Data"
+                ],
+                "summary": "Get route statistics",
+                "operationId": "cf3723018d2d206450143f97ede42603",
+                "parameters": [
+                    {
+                        "name": "driver_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2024-01-15"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/driver-optimizations": {
+            "get": {
+                "tags": [
+                    "Route Optimization"
+                ],
+                "summary": "Get route optimizations for authenticated driver",
+                "operationId": "8dcd0483c3d6baaa0908fda739bac2fa",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2024-01-01"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2024-01-31"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Optimizations retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized - User is not a driver"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/route-data/delete-optimization": {
+            "delete": {
+                "tags": [
+                    "Route Optimization"
+                ],
+                "summary": "Delete saved route optimization",
+                "operationId": "68fdf1ae1fde1e4424d7e61e738a681d",
+                "parameters": [
+                    {
+                        "name": "driver_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2024-01-15"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Route optimization deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "deleted": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Invoices",
+            "description": "Invoice generation and KSeF submission endpoints"
+        },
+        {
+            "name": "KPO Documents",
+            "description": "KPO (Waste Transfer Declaration) document management endpoints"
+        },
+        {
+            "name": "Route Data",
+            "description": "Route data management endpoints"
+        },
+        {
+            "name": "Route Optimization",
+            "description": "Route optimization endpoints"
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        }
+    ]
+}

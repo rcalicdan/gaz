@@ -7,6 +7,7 @@ use App\Services\EnumTranslationService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -23,6 +24,7 @@ class User extends Authenticatable
         'profile_path',
         'role',
         'active',
+        'client_id',
     ];
 
     protected $hidden = [
@@ -54,9 +56,6 @@ class User extends Authenticatable
         return !$this->active;
     }
 
-    /**
-     * Scope a query to only include active users.
-     */
     public function scopeActive($query)
     {
         return $query->where('active', true);
@@ -107,6 +106,11 @@ class User extends Authenticatable
         return $this->hasOne(Driver::class);
     }
 
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
@@ -125,6 +129,11 @@ class User extends Authenticatable
     public function isDriver(): bool
     {
         return $this->role === UserRole::DRIVER;
+    }
+
+    public function isClient(): bool
+    {
+        return $this->role === UserRole::CLIENT;
     }
 
     public function canManage(): bool

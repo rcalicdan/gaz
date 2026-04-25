@@ -22,8 +22,13 @@
             :label="__('Dashboard')" />
 
         @can('viewAny', App\Models\User::class)
-            <x-dashboard.sidebar-link href="{{ route('users.index') }}" icon="fas fa-users" :active="request()->routeIs('users.*')"
-                :label="__('Users')" />
+            <x-dashboard.sidebar-link href="{{ route('users.index') }}" icon="fas fa-users-cog" :active="request()->routeIs('users.*')"
+                :label="__('Internal Staff')" />
+        @endcan
+
+        @can('viewAny', App\Models\User::class)
+            <x-dashboard.sidebar-link href="{{ route('client-users.index') }}" icon="fas fa-mobile-alt" :active="request()->routeIs('client-users.*')"
+                :label="__('App Users')" />
         @endcan
 
         @can('viewAny', App\Models\WasteType::class)
@@ -49,6 +54,11 @@
         @can('viewAny', App\Models\Route::class)
             <x-dashboard.sidebar-link href="{{ route('routes.index') }}" icon="fas fa-route" :active="request()->routeIs('routes.*')"
                 :label="__('Routes')" />
+        @endcan
+
+        @can('viewAny', App\Models\KpoDocument::class)
+            <x-dashboard.sidebar-link href="{{ route('kpo-documents.index') }}" icon="fas fa-file-signature"
+                :active="request()->routeIs('kpo-documents.*')" :label="__('KPO Documents')" />
         @endcan
 
         @can('viewAny', App\Models\Invoice::class)
